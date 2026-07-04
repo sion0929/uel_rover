@@ -38,8 +38,9 @@ RUN apt-get update && apt-get install -y \
     # RealSense D455 + 스캔 변환
     ros-jazzy-realsense2-camera \
     ros-jazzy-pointcloud-to-laserscan \
-    # Zenoh RMW + 위치추정(AMCL/map_server)
-    ros-jazzy-rmw-zenoh-cpp \
+    # 위치추정(AMCL/map_server)
+    #   ※ RMW는 기본 DDS 유지. 젯슨↔개발PC는 zenoh-bridge-ros2dds(별도
+    #     컨테이너)로 브릿지하므로 이미지에 rmw_zenoh_cpp 불필요.
     ros-jazzy-nav2-amcl \
     ros-jazzy-nav2-map-server \
     # 유틸

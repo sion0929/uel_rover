@@ -10,8 +10,7 @@ from ament_index_python.packages import get_package_share_directory
 # 위치추정 모드: 공통 브링업 + map_server + AMCL (저장맵 주행)
 def generate_launch_description():
     pkg = get_package_share_directory('uel_rover_control')
-    nav2_params = os.path.join(pkg, 'config', 'nav2_params.yaml')
-    loc_params  = os.path.join(pkg, 'config', 'localization.yaml')
+    loc_params = os.path.join(pkg, 'config', 'localization.yaml')
 
     map_yaml     = LaunchConfiguration('map')
     use_sim_time = LaunchConfiguration('use_sim_time', default='false')
@@ -26,7 +25,7 @@ def generate_launch_description():
             PythonLaunchDescriptionSource(
                 os.path.join(pkg, 'launch', 'bringup_common.launch.py'))),
 
-        # map_server: nav2_params + localization 오버레이 + map 경로 주입
+        # map_server: localization 오버레이 로드 + map 경로 주입
         Node(package='nav2_map_server', executable='map_server',
              name='map_server', output='screen',
              parameters=[loc_params, {'yaml_filename': map_yaml,

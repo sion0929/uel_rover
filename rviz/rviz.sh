@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 set -e
 cd "$(dirname "$0")"
-xhost +local:docker
+xhost +local:docker || true
 docker compose -f docker-compose.rviz.yml up --build

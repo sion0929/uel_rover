@@ -10,16 +10,18 @@
 
 services:
 
-  # ── Zenoh 라우터 (다중 머신 discovery 허브) ────────────────────
-  zenoh_router:
-    image: uel_rover:jazzy
-    container_name: zenoh_router
+  # ── Zenoh 브릿지 (젯슨 DDS 그래프 ↔ 개발PC 무선 링크) ──────────
+  #   RMW는 그대로 DDS. 이 브릿지가 로컬 DDS(ROS_DOMAIN_ID=0) 그래프를
+  #   발견해 tcp/7447로 노출 → 개발PC의 zenoh_bridge가 여기로 접속한다.
+  #   (micro_ros_agent가 DDS 네이티브라 RMW를 Zenoh로 못 바꾸므로,
+  #    RMW는 DDS로 유지하고 머신 경계에서만 Zenoh로 브릿지)
+  zenoh_bridge:
+    image: eclipse/zenoh-bridge-ros2dds:latest   # 실기에서 버전 고정 권장
+    container_name: zenoh_bridge
     network_mode: host
     environment:
-      - RMW_IMPLEMENTATION=rmw_zenoh_cpp
-    command: >
-      bash -c "source /opt/ros/jazzy/setup.bash &&
-               ros2 run rmw_zenoh_cpp rmw_zenohd"
+      - ROS_DOMAIN_ID=0
+    command: ["-l", "tcp/0.0.0.0:7447"]
     restart: unless-stopped
 
   # ── micro-ROS Agent (OpenRB-150 ↔ ROS2 브릿지) ──────────────
@@ -39,12 +41,11 @@ services:
     container_name: uel_rover
     depends_on:
       - micro_ros_agent
-      - zenoh_router
+      - zenoh_bridge
     network_mode: host
     privileged: true            # RealSense USB 접근용
     environment:
       - ROS_DOMAIN_ID=0
-      - RMW_IMPLEMENTATION=rmw_zenoh_cpp
     volumes:
       - ./src:/ros2_ws/src
       - /dev:/dev               # RealSense D455 USB3 장치 접근

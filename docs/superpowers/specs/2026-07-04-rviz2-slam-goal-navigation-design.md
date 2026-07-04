@@ -20,25 +20,32 @@ RC/AUTO/STOP 3모드를 안전 스위치로 활용한다.
 
 ```
 ┌─────────────────── 젯슨 오린 (headless, Docker) ───────────────────┐
-│  zenoh_router (rmw_zenohd, :7447)                                   │
 │  micro_ros_agent ── OpenRB-150 (바퀴 RPM/명령, 시리얼)              │
 │  odom_publisher, mode_manager                                       │
 │  RealSense D455 → pointcloud_to_laserscan → /scan                   │
-│                                                                     │
+│  ── 위 노드 전부 로컬 DDS(ROS_DOMAIN_ID=0)로 통신 ──                 │
 │  [모드① 매핑]   slam_toolbox      → /map + map→odom TF              │
 │  [모드② 주행]   map_server+AMCL   → 저장맵 + map→odom TF            │
 │  Nav2 (controller/planner/behavior/bt/waypoint) + lifecycle_manager │
-└──────────────────── Zenoh (RMW=rmw_zenoh_cpp, host net) ───────────┘
-                                   ↕  같은 LAN (192.168.0.x)
+│  zenoh_bridge (zenoh-bridge-ros2dds, listen :7447) ── DDS↔Zenoh     │
+└──────────────────────────────── │ Zenoh (무선 링크) ───────────────┘
+                                   ↕  같은 LAN/WiFi (192.168.0.x)
 ┌─────────────── 개발 PC (Ubuntu, Docker jazzy-desktop) ─────────────┐
-│  rviz2 ── 맵/스캔/로봇모델 시각화 + "2D Goal Pose" 클릭 → /goal_pose │
+│  zenoh_bridge (connect 192.168.0.112:7447) ── 젯슨 토픽을 로컬 DDS로 │
+│  rviz2 ── (로컬 DDS 구독) 맵/스캔/로봇모델 + "2D Goal Pose" → /goal_pose │
 │         (드라이브 모드와 무관하게 상시 실행)                         │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 - **역할 분리:** 젯슨 = 센서·SLAM·Nav2 연산 / 개발 PC = 화면·목표점 지정
-- **통신:** 양쪽 모두 `RMW_IMPLEMENTATION=rmw_zenoh_cpp`, 개발 PC는 젯슨의
-  Zenoh 라우터(`tcp/192.168.0.112:7447`)에 client로 접속
+- **통신(방법 A):** RMW는 **양쪽 모두 기본 DDS 유지**. 각 머신에
+  `zenoh-bridge-ros2dds`를 두고, **젯슨↔개발PC 무선 구간만 Zenoh로 브릿지**한다.
+  개발 PC 브릿지가 젯슨 브릿지(`tcp/192.168.0.112:7447`)에 접속해 젯슨 토픽을
+  개발 PC 로컬 DDS 그래프로 재주입 → rviz2는 로컬 토픽처럼 구독.
+  - **왜 rmw_zenoh_cpp를 안 쓰나:** `micro_ros_agent`(Micro XRCE-DDS Agent)는
+    DDS 네이티브라 RMW를 Zenoh로 못 바꾼다. RMW를 Zenoh로 통일하면 agent만
+    DDS 섬으로 남아 `/wheel_velocity`·모터명령이 끊긴다. 그래서 RMW는 DDS로
+    두고 머신 경계에서만 Zenoh 브릿지를 쓴다(ROS2+Zenoh 표준 사용법).
 - **모드 전환:** 젯슨에서 실행하는 launch 파일만 교체 (매핑 ↔ 주행)
 
 ## 3. 젯슨쪽 구성 (접근 A — launch 분리)
@@ -72,55 +79,61 @@ launch/
   `ros2 run nav2_map_server map_saver_cli -f /maps/<name>` → `.yaml` + `.pgm`
 - `docker-compose.yml`에 `/maps` 볼륨 마운트로 컨테이너 밖 영구 보존
 
-### 3.4 Zenoh 전환
+### 3.4 Zenoh 브릿지 (방법 A — RMW는 DDS 유지)
 
-- `Dockerfile`에 `ros-jazzy-rmw-zenoh-cpp` 설치 추가
-- 모든 서비스 환경변수: `RMW_IMPLEMENTATION=rmw_zenoh_cpp`
-- `docker-compose.yml`에 **`zenoh_router` 서비스 신설**
-  (`ros2 run rmw_zenoh_cpp rmw_zenohd`), 포트 `7447/tcp` 개방,
-  `restart: unless-stopped`
-- `micro_ros_agent`는 micro-ROS(시리얼 브릿지)라 RMW 변경과 무관
+- **RMW 변경 없음.** 젯슨 그래프(agent·rover·Nav2·SLAM)는 전부 기본 DDS
+  (`ROS_DOMAIN_ID=0`)로 통신 → micro-ROS agent 정상.
+- `docker-compose.yml`에 **`zenoh_bridge` 서비스 신설**:
+  이미지 `eclipse/zenoh-bridge-ros2dds`, `command: ["-l","tcp/0.0.0.0:7447"]`,
+  `network_mode: host`, `ROS_DOMAIN_ID=0`, `restart: unless-stopped`.
+  로컬 DDS 그래프를 발견해 `7447/tcp`로 Zenoh 노출.
+- `Dockerfile`에는 `rmw_zenoh_cpp`를 **넣지 않는다** (브릿지는 별도 이미지).
+  amcl/map_server만 추가.
+- `micro_ros_agent`는 변경 없음 (DDS 그대로, 이제 그래프 전체가 DDS라 정상 통신).
 
-## 4. 개발 PC 구성 (rviz2 + Zenoh)
+## 4. 개발 PC 구성 (rviz2 + Zenoh 브릿지)
 
 ### 4.1 새 파일
 
 ```
 rviz/
- ├─ docker-compose.rviz.yml    ← 개발 PC 전용 실행 구성
- ├─ Dockerfile.rviz            ← ros:jazzy-desktop 기반
+ ├─ docker-compose.rviz.yml    ← 개발 PC 전용 실행 (zenoh_bridge + rviz2)
+ ├─ Dockerfile.rviz            ← ros:jazzy-desktop 기반 (기본 DDS)
  ├─ uel_rover.rviz             ← rviz2 화면 프리셋
- ├─ zenoh_client.json5         ← 젯슨 라우터 접속 설정
  └─ rviz.sh                    ← xhost + docker compose 원줄 실행 스크립트
 ```
+(라우터 접속 설정 `zenoh_client.json5`는 불필요 — 브릿지가 CLI `-e` 플래그로 접속)
 
 ### 4.2 Dockerfile.rviz
 
 - 베이스: `osrf/ros:jazzy-desktop` (rviz2 기본 포함)
-- 추가 설치: `ros-jazzy-nav2-rviz-plugins`, `ros-jazzy-rmw-zenoh-cpp`
-- `RMW_IMPLEMENTATION=rmw_zenoh_cpp` (젯슨과 동일 필수)
+- 추가 설치: `ros-jazzy-nav2-rviz-plugins` (rmw_zenoh 불필요 — rviz2는 로컬 DDS)
 
-### 4.3 docker-compose.rviz.yml (핵심)
+### 4.3 docker-compose.rviz.yml (핵심 — 두 서비스)
 
 ```yaml
-environment:
-  - DISPLAY=${DISPLAY}
-  - RMW_IMPLEMENTATION=rmw_zenoh_cpp
-  - ZENOH_SESSION_CONFIG_URI=/config/zenoh_client.json5
-volumes:
-  - /tmp/.X11-unix:/tmp/.X11-unix:rw
-  - ./rviz:/config
-network_mode: host
-command: rviz2 -d /config/uel_rover.rviz
+services:
+  zenoh_bridge:                       # 젯슨 브릿지로 접속 → 토픽을 로컬 DDS로 재주입
+    image: eclipse/zenoh-bridge-ros2dds:latest
+    network_mode: host
+    environment: [ROS_DOMAIN_ID=0]
+    command: ["-e", "tcp/192.168.0.112:7447"]
+  rviz2:                              # 로컬 DDS 그래프 구독
+    build: { context: ., dockerfile: Dockerfile.rviz }
+    network_mode: host
+    depends_on: [zenoh_bridge]
+    environment:
+      - DISPLAY=${DISPLAY}
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./:/config
+    command: rviz2 -d /config/uel_rover.rviz
 ```
 
 - 실행 전 호스트에서 `xhost +local:docker` (rviz.sh가 처리)
-
-### 4.4 zenoh_client.json5
-
-```json5
-{ mode: "client", connect: { endpoints: ["tcp/192.168.0.112:7447"] } }
-```
+- 젯슨·개발 PC의 `zenoh-bridge-ros2dds` 이미지 **태그를 동일하게** 유지
+  (Zenoh 프로토콜 버전 일치)
 
 ### 4.5 uel_rover.rviz 프리셋 디스플레이
 
@@ -150,10 +163,8 @@ command: rviz2 -d /config/uel_rover.rviz
 
 ### A. 매핑 (RC 수동 주행)
 ```
-젯슨$  docker compose up -d zenoh_router micro_ros_agent
-젯슨$  docker compose run uel_rover \
-         ros2 launch uel_rover_control mapping.launch.py
-개발PC$ ./rviz/rviz.sh
+젯슨$  docker compose up              (zenoh_bridge, micro_ros_agent, uel_rover=매핑)
+개발PC$ ./rviz/rviz.sh                (zenoh_bridge + rviz2)
 → 조종기 RC 모드로 천천히 주행, rviz2에서 /map 확장 확인
 → ros2 run nav2_map_server map_saver_cli -f /maps/office
 ```
@@ -179,8 +190,12 @@ command: rviz2 -d /config/uel_rover.rviz
 
 ## 8. 리스크 / 주의
 
-- **RMW 일치:** 젯슨·개발 PC 모두 jazzy + `rmw_zenoh_cpp` 여야 통신됨
-- **방화벽:** Zenoh 포트 `7447/tcp` 개방 필요
+- **브릿지 이미지 태그 일치:** 젯슨·개발 PC의 `zenoh-bridge-ros2dds` 태그를
+  동일하게 (Zenoh 프로토콜 버전 일치). `:latest`는 실기에서 특정 버전으로 고정 권장.
+- **ROS_DOMAIN_ID 일치:** 양쪽 브릿지·노드 모두 `0`.
+- **방화벽:** Zenoh 포트 `7447/tcp` 개방 필요 (젯슨에서 listen)
+- **RMW 불변경:** 그래프는 DDS 유지 — `micro_ros_agent`(DDS 네이티브)와의
+  통신을 위해 rmw_zenoh_cpp로 바꾸지 말 것 (바꾸면 agent가 고립됨).
 - **odom drift:** 긴 수동 매핑 시 누적 오차 → slam_toolbox 루프 클로저로 보정
   (급격한 회전 자제)
 - **펌웨어 확인:** OpenRB-150이 RC 모드에서도 `/wheel_velocity` 발행 유지해야 함

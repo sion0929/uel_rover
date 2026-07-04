@@ -1,6 +1,0 @@
-{
-  mode: "client",
-  connect: {
-    endpoints: ["tcp/192.168.0.112:7447"],
-  },
-}

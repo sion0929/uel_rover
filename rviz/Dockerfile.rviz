@@ -1,7 +1,7 @@
 FROM osrf/ros:jazzy-desktop
 ENV DEBIAN_FRONTEND=noninteractive
+# rviz2는 기본 DDS로 로컬 그래프에 붙는다. 젯슨 토픽은 개발PC의
+# zenoh_bridge(별도 컨테이너)가 로컬 DDS로 재주입하므로 rviz는 RMW 변경 불필요.
 RUN apt-get update && apt-get install -y \
-    ros-jazzy-rmw-zenoh-cpp \
     ros-jazzy-nav2-rviz-plugins \
     && rm -rf /var/lib/apt/lists/*
-ENV RMW_IMPLEMENTATION=rmw_zenoh_cpp

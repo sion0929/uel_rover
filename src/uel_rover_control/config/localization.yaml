@@ -1,6 +1,6 @@
 # ═══════════════════════════════════════════════════════════════
-#  위치추정 모드 오버레이 — map_server + AMCL + static global costmap
-#  localization.launch.py에서 nav2_params.yaml 뒤에 로드하여 병합
+#  위치추정 모드 오버레이 — map_server + AMCL (+ static global costmap 정의)
+#  localization.launch.py에서 map_server / amcl 노드에 로드된다.
 # ═══════════════════════════════════════════════════════════════
 
 # ── 저장맵 서버 ─────────────────────────────────────────────────
@@ -34,6 +34,11 @@ amcl:
     tf_broadcast: true
 
 # ── global_costmap: rolling → static (저장맵 사용) ──────────────
+#  ※ v1 한계(설계 §3.2): 실제 global_costmap은 planner_server 안에 있고
+#    planner_server는 bringup_common에서 nav2_params.yaml만 로드하므로,
+#    아래 블록은 현재 어떤 노드에도 적용되지 않는다(비활성). 저장맵 기반
+#    전역계획을 켜려면 이 오버레이를 planner/controller에도 전달해야 함.
+#    v1의 목표주행(AMCL 위치추정 + rolling costmap)은 이대로 성립.
 global_costmap:
   global_costmap:
     ros__parameters:
