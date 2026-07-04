@@ -1,0 +1,7 @@
+build/
+install/
+log/
+.vscode/browse.vc.db*
+maps/
+__pycache__/
+.superpowers/

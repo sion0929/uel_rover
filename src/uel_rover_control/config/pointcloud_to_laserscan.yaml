@@ -1,0 +1,29 @@
+# ═══════════════════════════════════════════════════════════════
+#  pointcloud_to_laserscan — D455 깊이 포인트클라우드 → 가상 2D 스캔
+#
+#  입력: /camera/depth/color/points (sensor_msgs/PointCloud2)
+#  출력: /scan (sensor_msgs/LaserScan)  ← slam_toolbox, Nav2 costmap 입력
+# ═══════════════════════════════════════════════════════════════
+pointcloud_to_laserscan:
+  ros__parameters:
+    # 결과 스캔을 표현할 기준 프레임
+    target_frame: base_link
+    transform_tolerance: 0.05
+
+    # 장애물로 간주할 높이 대역 [m] (base_link 기준, base_link은 바닥 위 0.065m)
+    #   바닥 잡음 제거: 바닥(-0.065)보다 살짝 위부터 로버 높이 정도까지
+    min_height: -0.04
+    max_height:  0.50
+
+    # 수평 시야각 [rad] — D455 depth FOV 약 87° → ±0.76rad
+    angle_min: -0.76
+    angle_max:  0.76
+    angle_increment: 0.0087   # 약 0.5°
+    scan_time: 0.0333          # 30Hz
+    range_min: 0.6            # D455 최소 깊이
+    range_max: 6.0            # D455 유효 깊이
+
+    use_inf: true
+    inf_epsilon: 1.0
+    # 성능: 너무 촘촘하면 부하 → 포인트 일부만 사용
+    concurrency_level: 1

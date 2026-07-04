@@ -1,0 +1,76 @@
+<?xml version="1.0"?>
+<!-- ═══════════════════════════════════════════════════════════════
+     UEL Rover URDF (TF 정의용)
+       base_link (차체 중심, 기준 프레임)   ← odom_publisher가 odom→base_link 발행
+        ├─ left_wheel_link
+        ├─ right_wheel_link
+        └─ camera_link (RealSense D455 장착 위치)
+
+     ※ base_footprint 없이 base_link를 로봇 기준 프레임으로 사용
+        (odom_publisher가 odom→base_link 를 발행하므로 프레임 통일)
+     ※ 아래 치수/카메라 위치는 실측 후 수정
+        - wheel_radius : 0.065 m,  wheel_base : 0.30 m
+        - 카메라: 차체 앞 0.20m, base_link 기준 높이 0.135m, 정면 주시
+     ═══════════════════════════════════════════════════════════════ -->
+<robot name="uel_rover">
+
+  <!-- 차체 중심 = 로봇 기준 프레임 -->
+  <link name="base_link">
+    <visual>
+      <geometry>
+        <box size="0.40 0.30 0.12"/>
+      </geometry>
+      <material name="gray">
+        <color rgba="0.4 0.4 0.4 1.0"/>
+      </material>
+    </visual>
+    <collision>
+      <geometry>
+        <box size="0.40 0.30 0.12"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- 좌측 바퀴 -->
+  <link name="left_wheel_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.065" length="0.03"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="left_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="left_wheel_link"/>
+    <origin xyz="0 0.15 0" rpy="-1.5708 0 0"/>
+  </joint>
+
+  <!-- 우측 바퀴 -->
+  <link name="right_wheel_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.065" length="0.03"/>
+      </geometry>
+      <material name="black">
+        <color rgba="0.1 0.1 0.1 1.0"/>
+      </material>
+    </visual>
+  </link>
+  <joint name="right_wheel_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="right_wheel_link"/>
+    <origin xyz="0 -0.15 0" rpy="-1.5708 0 0"/>
+  </joint>
+
+  <!-- RealSense D455 장착 위치 (실측 후 수정) -->
+  <link name="camera_link"/>
+  <joint name="camera_joint" type="fixed">
+    <parent link="base_link"/>
+    <child  link="camera_link"/>
+    <origin xyz="0.20 0 0.135" rpy="0 0 0"/>
+  </joint>
+
+</robot>

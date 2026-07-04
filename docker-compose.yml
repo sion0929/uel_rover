@@ -1,0 +1,44 @@
+# ═══════════════════════════════════════════════════════════════
+#  UEL Rover 실행 구성
+#
+#  구조:
+#    OpenRB-150(펌웨어) ─USB시리얼─ micro_ros_agent ─DDS─ uel_rover 노드
+#
+#  - micro_ros_agent : OpenRB-150 시리얼 ↔ ROS2 토픽 브릿지
+#  - uel_rover       : odom_publisher, mode_manager (DDS로만 통신)
+# ═══════════════════════════════════════════════════════════════
+
+services:
+
+  # ── micro-ROS Agent (OpenRB-150 ↔ ROS2 브릿지) ──────────────
+  micro_ros_agent:
+    image: microros/micro-ros-agent:jazzy
+    container_name: micro_ros_agent
+    command: serial --dev /dev/ttyACM0 -b 115200
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0   # OpenRB-150 USB 포트 (실제 포트 확인 필요)
+    network_mode: host
+    restart: unless-stopped
+
+  # ── UEL Rover 제어 + Nav2 + RealSense ────────────────────────
+  uel_rover:
+    build: .
+    image: uel_rover:jazzy
+    container_name: uel_rover
+    depends_on:
+      - micro_ros_agent
+    network_mode: host
+    privileged: true            # RealSense USB 접근용
+    environment:
+      - ROS_DOMAIN_ID=0
+    volumes:
+      - ./src:/ros2_ws/src
+      - /dev:/dev               # RealSense D455 USB3 장치 접근
+    stdin_open: true
+    tty: true
+    command: >
+      bash -c "
+        source /opt/ros/jazzy/setup.bash &&
+        source /ros2_ws/install/setup.bash &&
+        ros2 launch uel_rover_control nav2_bringup.launch.py
+      "

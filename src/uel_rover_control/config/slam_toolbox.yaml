@@ -1,0 +1,40 @@
+# ═══════════════════════════════════════════════════════════════
+#  slam_toolbox — 2D SLAM (지도 생성 + 위치추정, map→odom TF 발행)
+#
+#  입력: /scan (LaserScan, pointcloud_to_laserscan 출력)
+#        odom→base_footprint TF (odom_publisher)
+#  출력: /map, map→odom TF
+# ═══════════════════════════════════════════════════════════════
+slam_toolbox:
+  ros__parameters:
+    # ── 프레임 ──────────────────────────────────────────────
+    odom_frame: odom
+    map_frame: map
+    base_frame: base_link
+    scan_topic: /scan
+    use_scan_matching: true
+    mode: mapping            # mapping | localization
+
+    # ── 처리 주기 ───────────────────────────────────────────
+    transform_publish_period: 0.02   # 50Hz map→odom TF
+    map_update_interval: 1.0
+    resolution: 0.05                 # 지도 해상도 [m/cell]
+    min_laser_range: 0.6
+    max_laser_range: 6.0
+    minimum_time_interval: 0.2
+    transform_timeout: 0.2
+    tf_buffer_duration: 10.0
+
+    # ── 스캔 매칭/그래프 최적화 ─────────────────────────────
+    minimum_travel_distance: 0.2     # 이 거리 이동해야 스캔 추가
+    minimum_travel_heading: 0.2
+    scan_buffer_size: 10
+    ceres_linear_solver: SPARSE_NORMAL_CHOLESKY
+    ceres_preconditioner: SCHUR_JACOBI
+    ceres_trust_strategy: LEVENBERG_MARQUARDT
+    ceres_loss_function: None
+
+    # 루프 클로저 (좁은 FOV 카메라 SLAM이라 보수적으로)
+    do_loop_closing: true
+    loop_search_maximum_distance: 3.0
+    loop_match_minimum_response_fine: 0.45
