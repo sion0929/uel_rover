@@ -1,0 +1,45 @@
+# ═══════════════════════════════════════════════════════════════
+#  위치추정 모드 오버레이 — map_server + AMCL + static global costmap
+#  localization.launch.py에서 nav2_params.yaml 뒤에 로드하여 병합
+# ═══════════════════════════════════════════════════════════════
+
+# ── 저장맵 서버 ─────────────────────────────────────────────────
+map_server:
+  ros__parameters:
+    yaml_filename: ""          # localization.launch.py의 map:= 인자로 주입
+    topic_name: "map"
+    frame_id: "map"
+
+# ── AMCL 위치추정 (map→odom TF 제공) ────────────────────────────
+amcl:
+  ros__parameters:
+    global_frame_id: "map"
+    odom_frame_id: "odom"
+    base_frame_id: "base_link"
+    scan_topic: "scan"
+    laser_model_type: "likelihood_field"
+    robot_model_type: "nav2_amcl::DifferentialMotionModel"
+    min_particles: 500
+    max_particles: 2000
+    update_min_d: 0.15
+    update_min_a: 0.2
+    laser_max_range: 6.0
+    laser_min_range: 0.1
+    max_beams: 60
+    alpha1: 0.2
+    alpha2: 0.2
+    alpha3: 0.2
+    alpha4: 0.2
+    transform_tolerance: 0.5
+    tf_broadcast: true
+
+# ── global_costmap: rolling → static (저장맵 사용) ──────────────
+global_costmap:
+  global_costmap:
+    ros__parameters:
+      rolling_window: false
+      track_unknown_space: true
+      plugins: ["static_layer", "obstacle_layer", "inflation_layer"]
+      static_layer:
+        plugin: "nav2_costmap_2d::StaticLayer"
+        map_subscribe_transient_local: true
