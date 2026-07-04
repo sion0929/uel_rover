@@ -38,6 +38,10 @@ RUN apt-get update && apt-get install -y \
     # RealSense D455 + 스캔 변환
     ros-jazzy-realsense2-camera \
     ros-jazzy-pointcloud-to-laserscan \
+    # Zenoh RMW + 위치추정(AMCL/map_server)
+    ros-jazzy-rmw-zenoh-cpp \
+    ros-jazzy-nav2-amcl \
+    ros-jazzy-nav2-map-server \
     # 유틸
     udev \
     nano \
