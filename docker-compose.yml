@@ -10,6 +10,18 @@
 
 services:
 
+  # ── Zenoh 라우터 (다중 머신 discovery 허브) ────────────────────
+  zenoh_router:
+    image: uel_rover:jazzy
+    container_name: zenoh_router
+    network_mode: host
+    environment:
+      - RMW_IMPLEMENTATION=rmw_zenoh_cpp
+    command: >
+      bash -c "source /opt/ros/jazzy/setup.bash &&
+               ros2 run rmw_zenoh_cpp rmw_zenohd"
+    restart: unless-stopped
+
   # ── micro-ROS Agent (OpenRB-150 ↔ ROS2 브릿지) ──────────────
   micro_ros_agent:
     image: microros/micro-ros-agent:jazzy
@@ -27,18 +39,21 @@ services:
     container_name: uel_rover
     depends_on:
       - micro_ros_agent
+      - zenoh_router
     network_mode: host
     privileged: true            # RealSense USB 접근용
     environment:
       - ROS_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_zenoh_cpp
     volumes:
       - ./src:/ros2_ws/src
       - /dev:/dev               # RealSense D455 USB3 장치 접근
+      - ./maps:/maps
     stdin_open: true
     tty: true
     command: >
       bash -c "
         source /opt/ros/jazzy/setup.bash &&
         source /ros2_ws/install/setup.bash &&
-        ros2 launch uel_rover_control nav2_bringup.launch.py
+        ros2 launch uel_rover_control mapping.launch.py
       "
