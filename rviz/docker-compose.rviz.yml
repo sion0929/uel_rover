@@ -1,0 +1,18 @@
+services:
+  rviz2:
+    build:
+      context: .
+      dockerfile: Dockerfile.rviz
+    image: uel_rover_rviz:jazzy
+    container_name: uel_rover_rviz
+    network_mode: host
+    environment:
+      - DISPLAY=${DISPLAY}
+      - RMW_IMPLEMENTATION=rmw_zenoh_cpp
+      - ZENOH_SESSION_CONFIG_URI=/config/zenoh_client.json5
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./:/config
+    command: >
+      bash -c "source /opt/ros/jazzy/setup.bash &&
+               rviz2 -d /config/uel_rover.rviz"

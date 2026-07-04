@@ -1,0 +1,7 @@
+FROM osrf/ros:jazzy-desktop
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y \
+    ros-jazzy-rmw-zenoh-cpp \
+    ros-jazzy-nav2-rviz-plugins \
+    && rm -rf /var/lib/apt/lists/*
+ENV RMW_IMPLEMENTATION=rmw_zenoh_cpp
