@@ -54,6 +54,7 @@ def generate_launch_description():
                  'enable_infra1': False,
                  'enable_infra2': False,
                  'pointcloud.enable': True,
+                 'align_depth.enable': True,   # 컬러 포인트클라우드는 정렬 depth 기반 (필수)
                  'enable_sync': True,
                  'depth_module.depth_profile': '640x480x30',
                  'rgb_camera.color_profile': '640x480x30',
@@ -66,7 +67,7 @@ def generate_launch_description():
              executable='pointcloud_to_laserscan_node',
              name='pointcloud_to_laserscan', output='screen',
              parameters=[p2l_params],
-             remappings=[('cloud_in', '/camera/depth/color/points'),
+             remappings=[('cloud_in', '/camera/camera/depth/color/points'),
                          ('scan', '/scan')]),
 
         # ── Nav2 핵심 서버 ────────────────────────────────────────
