@@ -5,6 +5,7 @@
 #include <tf2/LinearMath/Quaternion.h>
 #include <geometry_msgs/msg/transform_stamped.hpp>
 #include <chrono>
+#include <cmath>
 
 // ────────────────────────────────────────────────────────────────
 //  오도메트리 노드
@@ -22,6 +23,10 @@ public:
     OdomPublisher() : Node("odom_publisher") {
         wheel_base_   = declare_parameter("wheel_base",   0.30);
         wheel_radius_ = declare_parameter("wheel_radius", 0.065);
+        // 펌웨어의 MAX_RPM은 50. 그 2배를 넘는 값은 물리적으로 나올 수 없으므로
+        // 측정이 아니라 오염으로 간주한다. 여유를 크게 둬서 정상 주행은 절대
+        // 걸리지 않게 한다.
+        max_wheel_rpm_ = declare_parameter("max_wheel_rpm", 100.0);
 
         odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("/odom", 10);
         tf_br_    = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
@@ -45,9 +50,26 @@ private:
 
         if (dt <= 0.0 || dt > 1.0) return;  // 비정상 dt 무시
 
+        // 비물리적 RPM 방어. 2026-07-22 실기에서 odom이 (-71 km, -257 km)와
+        // (-6.7 km, -9.2 km)까지 발산한 사례가 있었다. 그 좌표에서 slam_toolbox가
+        // 0.05 m 해상도 OccupancyGrid를 잡으려 하면 약 99 GB가 필요해 커널 OOM
+        // Killer에 SIGKILL(exit -9) 당한다. 발생원은 아직 특정하지 못했으므로
+        // (재현 실패) 근본 수정이 아니라 적분 단계의 가드다.
+        const float rpm_l = msg->data[0];
+        const float rpm_r = msg->data[1];
+        if (!std::isfinite(rpm_l) || !std::isfinite(rpm_r) ||
+            std::fabs(rpm_l) > max_wheel_rpm_ || std::fabs(rpm_r) > max_wheel_rpm_) {
+            // 조용히 버리면 발생원 추적이 불가능해지므로 반드시 남긴다.
+            RCLCPP_WARN_THROTTLE(
+                get_logger(), *get_clock(), 1000,
+                "비물리적 바퀴 속도 무시: [%.3f, %.3f] rpm (허용 ±%.1f)",
+                rpm_l, rpm_r, max_wheel_rpm_);
+            return;
+        }
+
         // RPM → m/s 변환
-        double v_left  = rpmToMs(msg->data[0]);
-        double v_right = rpmToMs(msg->data[1]);
+        double v_left  = rpmToMs(rpm_l);
+        double v_right = rpmToMs(rpm_r);
 
         // 차동구동 기구학
         double v     = (v_left + v_right) / 2.0;
@@ -103,7 +125,7 @@ private:
     rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
     std::unique_ptr<tf2_ros::TransformBroadcaster> tf_br_;
 
-    double wheel_base_, wheel_radius_;
+    double wheel_base_, wheel_radius_, max_wheel_rpm_;
     double x_ = 0, y_ = 0, theta_ = 0;
     rclcpp::Time last_time_;
 };
