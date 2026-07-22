@@ -262,25 +262,11 @@ void setup() {
 //  loop
 // ──────────────────────────────────────────────────────────────
 void loop() {
-    // micro-ROS Agent 연결 관리
-    if (!agent_connected) {
-        stopMotors();
-        if (initMicroROS()) {
-            agent_connected = true;
-        } else {
-            delay(500);
-            return;
-        }
-    }
-
-    if (rclc_executor_spin_some(&executor, RCL_MS_TO_NS(5)) != RCL_RET_OK) {
-        agent_connected = false;
-        destroyMicroROS();
-        stopMotors();
-        return;
-    }
-
-    // ── 모드별 모터 제어 ──────────────────────────────────────
+    // ── 모드별 모터 제어 (micro-ROS 연결 상태와 무관하게 매 루프 실행) ──
+    //    RC/STOP은 데드맨 스위치라 ROS/에이전트 연결 여부와 상관없이
+    //    항상 동작해야 한다. 아래 micro-ROS 연결 관리 블록에서 초기화
+    //    실패 시 return하던 예전 구조는 이 블록 자체를 건너뛰게 만들어
+    //    에이전트가 안 붙어 있으면 RC 조종까지 막히는 버그가 있었다.
     DriveMode mode = getDriveMode();
 
     if (mode == MODE_RC) {
@@ -292,7 +278,7 @@ void loop() {
         setWheelVelocity(left_rpm, right_rpm);
 
     } else if (mode == MODE_AUTO) {
-        if (millis() - last_cmd_ms > WATCHDOG_MS) {
+        if (!agent_connected || millis() - last_cmd_ms > WATCHDOG_MS) {
             stopMotors();
         } else {
             setWheelVelocity(target_left_rpm, target_right_rpm);
@@ -300,6 +286,22 @@ void loop() {
 
     } else {
         stopMotors();
+    }
+
+    // ── micro-ROS Agent 연결 관리 ─────────────────────────────
+    if (!agent_connected) {
+        if (initMicroROS()) {
+            agent_connected = true;
+        } else {
+            delay(500);
+            return;
+        }
+    }
+
+    if (rclc_executor_spin_some(&executor, RCL_MS_TO_NS(5)) != RCL_RET_OK) {
+        agent_connected = false;
+        destroyMicroROS();
+        return;
     }
 
     // ── 50Hz 발행 ────────────────────────────────────────────
