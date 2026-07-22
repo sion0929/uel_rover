@@ -74,8 +74,12 @@ def generate_launch_description():
              remappings=[('cmd_vel', '/cmd_vel_out')]),
         Node(package='nav2_planner', executable='planner_server',
              name='planner_server', output='screen', parameters=[nav2_params]),
+        # 복구 동작(spin/backup/drive_on_heading)도 controller_server와 같은
+        # 경로로 나가야 한다. remap이 없으면 /cmd_vel로 발행되는데 구독자가
+        # 없어(MCU는 /cmd_vel_out만 구독) 복구 명령이 버려진다.
         Node(package='nav2_behaviors', executable='behavior_server',
-             name='behavior_server', output='screen', parameters=[nav2_params]),
+             name='behavior_server', output='screen', parameters=[nav2_params],
+             remappings=[('cmd_vel', '/cmd_vel_out')]),
         Node(package='nav2_bt_navigator', executable='bt_navigator',
              name='bt_navigator', output='screen', parameters=[nav2_params]),
         Node(package='nav2_waypoint_follower', executable='waypoint_follower',
