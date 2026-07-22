@@ -18,7 +18,18 @@ pointcloud_to_laserscan:
     # 수평 시야각 [rad] — D455 depth FOV 약 87° → ±0.76rad
     angle_min: -0.76
     angle_max:  0.76
-    angle_increment: 0.0087   # 약 0.5°
+    # 빔 개수 정합용 값. pointcloud_to_laserscan은 ranges 개수를
+    #   ceil((angle_max-angle_min)/angle_increment)
+    # 로, slam_toolbox 내부 Karto는
+    #   round((angle_max-angle_min)/angle_increment) + 1
+    # 로 계산한다. 두 값이 같으려면 (Δ/increment)의 소수부가 0~0.5 사이여야 한다.
+    # 0.0087이면 Δ/inc = 174.7126 (소수부 0.71) → 175개 생성 / 176개 기대가 되어
+    # Karto의 LaserRangeFinder::Validate()가 모든 스캔을 거부하고
+    # "LaserRangeScan contains 175 range readings, expected 176" 로그만 남긴 채
+    # 맵이 전혀 생성되지 않았다.
+    # 0.00867이면 Δ/inc = 175.3172 (소수부 0.32) → 양쪽 모두 176개로 일치한다.
+    # 각분해능 변화는 0.4985° → 0.4967°로 무시할 수준이고 FOV는 그대로다.
+    angle_increment: 0.00867  # 약 0.5°
     scan_time: 0.0333          # 30Hz
     range_min: 0.6            # D455 최소 깊이
     range_max: 6.0            # D455 유효 깊이
