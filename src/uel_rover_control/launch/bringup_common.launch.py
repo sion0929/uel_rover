@@ -43,8 +43,12 @@ def generate_launch_description():
                           'use_sim_time': use_sim_time}]),
 
         # ── RealSense D455 ────────────────────────────────────────
+        # namespace='camera' + name='camera' → 토픽이 /camera/camera/... 로
+        # 발행된다. 이게 없으면 /camera/... 한 겹만 나와서 아래
+        # pointcloud_to_laserscan의 cloud_in remap(/camera/camera/...)과
+        # 어긋나 /scan이 생성되지 않는다(SLAM 입력 끊김).
         Node(package='realsense2_camera', executable='realsense2_camera_node',
-             name='camera', output='screen',
+             namespace='camera', name='camera', output='screen',
              parameters=[{
                  'initial_reset': True,
                  'enable_depth': True,
