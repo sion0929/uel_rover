@@ -71,6 +71,11 @@
 
 // ── 속도 설정 ─────────────────────────────────────────────────
 #define MAX_RPM       50.0f   // 최대 RPM (다이나믹셀 모델에 따라 조정)
+// 발행 전 present velocity 검증 임계값. dxl.getPresentVelocity()가 통신
+// 실패/타임아웃 시 검증 없이 이상값을 반환하는 것을 걸러낸다. 물리적으로
+// |RPM|은 MAX_RPM을 크게 넘을 수 없으므로 2배 여유를 둔다. 젯슨 쪽
+// odom 가드(max_wheel_rpm=100)와 값을 맞춘다.
+#define MAX_PLAUSIBLE_RPM (2.0f * MAX_RPM)
 #define WHEEL_BASE    0.30f   // [m] 좌우 바퀴 간격
 #define WHEEL_RADIUS  0.065f  // [m] 바퀴 반지름
 
@@ -451,9 +456,21 @@ void loop() {
                 float vr = dxl.getPresentVelocity(DXL_RIGHT_ID, UNIT_RPM);
                 if (RIGHT_MOTOR_INVERTED) vr = -vr;
 
-                vel_data[0] = vl;
-                vel_data[1] = vr;
-                rcl_publish(&vel_pub, &vel_msg, NULL);
+                // 발생원 방어(근본): 통신 오류로 getPresentVelocity가 NaN이나
+                // 물리적으로 불가능한 값을 반환하면 그 표본을 /wheel_velocity로
+                // 내보내지 않는다. 그대로 발행하면 젯슨 odom이 수십 km로 발산해
+                // slam_toolbox가 거대한 OccupancyGrid를 잡다 OOM으로 죽는다.
+                // 이상 표본은 그냥 건너뛴다(직전 odom 유지). 여기서 Serial로
+                // 로그를 찍으면 micro-ROS USB 시리얼 트랜스포트를 오염시키므로
+                // 절대 출력하지 않는다.
+                bool vel_ok = !isnan(vl) && !isnan(vr) &&
+                              fabsf(vl) <= MAX_PLAUSIBLE_RPM &&
+                              fabsf(vr) <= MAX_PLAUSIBLE_RPM;
+                if (vel_ok) {
+                    vel_data[0] = vl;
+                    vel_data[1] = vr;
+                    rcl_publish(&vel_pub, &vel_msg, NULL);
+                }
 
                 const char * mode_str = (mode == MODE_RC)  ? "RC"   :
                                         (mode == MODE_AUTO) ? "AUTO" : "STOP";
