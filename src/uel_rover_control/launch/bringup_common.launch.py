@@ -35,8 +35,6 @@ def generate_launch_description():
         # ── 로버 기본 노드 ────────────────────────────────────────
         Node(package='uel_rover_control', executable='odom_publisher',
              name='odom_publisher', output='screen', parameters=[params]),
-        Node(package='uel_rover_control', executable='mode_manager',
-             name='mode_manager', output='screen', parameters=[params]),
 
         # ── URDF → TF ─────────────────────────────────────────────
         Node(package='robot_state_publisher', executable='robot_state_publisher',
@@ -53,7 +51,8 @@ def generate_launch_description():
                  'enable_color': True,
                  'enable_infra1': False,
                  'enable_infra2': False,
-                 'pointcloud.enable': True,
+                 'pointcloud__neon_.enable': True,   # realsense-ros __neon_ 파라미터 버그
+                                                       # (IntelRealSense/realsense-ros #3397)
                  'enable_sync': True,
                  'depth_module.depth_profile': '640x480x30',
                  'rgb_camera.color_profile': '640x480x30',
@@ -66,12 +65,13 @@ def generate_launch_description():
              executable='pointcloud_to_laserscan_node',
              name='pointcloud_to_laserscan', output='screen',
              parameters=[p2l_params],
-             remappings=[('cloud_in', '/camera/depth/color/points'),
+             remappings=[('cloud_in', '/camera/camera/depth/color/points'),
                          ('scan', '/scan')]),
 
         # ── Nav2 핵심 서버 ────────────────────────────────────────
         Node(package='nav2_controller', executable='controller_server',
-             name='controller_server', output='screen', parameters=[nav2_params]),
+             name='controller_server', output='screen', parameters=[nav2_params],
+             remappings=[('cmd_vel', '/cmd_vel_out')]),
         Node(package='nav2_planner', executable='planner_server',
              name='planner_server', output='screen', parameters=[nav2_params]),
         Node(package='nav2_behaviors', executable='behavior_server',
