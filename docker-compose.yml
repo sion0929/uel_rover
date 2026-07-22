@@ -21,6 +21,7 @@ services:
     network_mode: host
     environment:
       - ROS_DOMAIN_ID=0
+      - ROS_DISTRO=jazzy
     command: ["-l", "tcp/0.0.0.0:7447"]
     restart: unless-stopped
 

@@ -23,4 +23,10 @@ def generate_launch_description():
         Node(package='slam_toolbox', executable='async_slam_toolbox_node',
              name='slam_toolbox', output='screen',
              parameters=[slam_params, {'use_sim_time': use_sim_time}]),
+
+        # slam_toolbox는 lifecycle 노드라 configure/activate를 걸어줄
+        # lifecycle_manager가 없으면 unconfigured 상태로 멈춰있는다
+        Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
+             name='lifecycle_manager_slam', output='screen',
+             parameters=[{'autostart': True, 'node_names': ['slam_toolbox']}]),
     ])

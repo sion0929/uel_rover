@@ -1,7 +1,7 @@
 # ═══════════════════════════════════════════════════════════════
 #  pointcloud_to_laserscan — D455 깊이 포인트클라우드 → 가상 2D 스캔
 #
-#  입력: /camera/depth/color/points (sensor_msgs/PointCloud2)
+#  입력: /camera/camera/depth/color/points (sensor_msgs/PointCloud2)
 #  출력: /scan (sensor_msgs/LaserScan)  ← slam_toolbox, Nav2 costmap 입력
 # ═══════════════════════════════════════════════════════════════
 pointcloud_to_laserscan:
