@@ -26,7 +26,13 @@ def generate_launch_description():
 
         # slam_toolbox는 lifecycle 노드라 configure/activate를 걸어줄
         # lifecycle_manager가 없으면 unconfigured 상태로 멈춰있는다
+        # bond_timeout: 재부팅 직후 CPU 부하로 slam_toolbox 초기화가 느려
+        #   기본 4s 안에 activate를 못 하면 "unable to be reached by bond →
+        #   Aborting bringup"으로 SLAM이 아예 안 뜬다. 여유를 크게 준다.
         Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
              name='lifecycle_manager_slam', output='screen',
-             parameters=[{'autostart': True, 'node_names': ['slam_toolbox']}]),
+             parameters=[{'autostart': True, 'node_names': ['slam_toolbox'],
+                          'bond_timeout': 30.0,
+                          'attempt_respawn_reconnection': True,
+                          'bond_respawn_max_duration': 60.0}]),
     ])

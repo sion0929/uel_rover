@@ -86,7 +86,12 @@ def generate_launch_description():
              name='waypoint_follower', output='screen', parameters=[nav2_params]),
 
         # ── Nav2 라이프사이클 매니저 (Nav2 서버만 관리) ───────────
+        # bond_timeout: 재부팅 직후 부하로 nav2 서버 activate가 느리면 기본
+        #   4s 안에 bond를 못 맺어 bringup이 abort된다. 여유를 크게 준다.
         Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
              name='lifecycle_manager_navigation', output='screen',
-             parameters=[{'autostart': True, 'node_names': nav2_lifecycle_nodes}]),
+             parameters=[{'autostart': True, 'node_names': nav2_lifecycle_nodes,
+                          'bond_timeout': 30.0,
+                          'attempt_respawn_reconnection': True,
+                          'bond_respawn_max_duration': 60.0}]),
     ])

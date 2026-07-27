@@ -49,6 +49,9 @@ services:
     build: .
     image: uel_rover:jazzy
     container_name: uel_rover
+    # 재부팅/크래시 시 자동 재시작 (zenoh_bridge·micro_ros_agent와 동일).
+    # 이게 없어 재부팅 후 uel_rover만 죽은 채 남는 문제가 있었다.
+    restart: unless-stopped
     depends_on:
       - micro_ros_agent
       - zenoh_bridge
