@@ -22,7 +22,11 @@ slam_toolbox:
     min_laser_range: 0.6
     max_laser_range: 6.0
     minimum_time_interval: 0.2
-    transform_timeout: 0.2
+    # 정지/저속 시 slam이 새 스캔을 처리하지 않아 map→odom TF 타임스탬프가
+    # 고정된다. 0.2s면 정지 직후 TF가 stale이 되어 nav2 controller가
+    # "Transform data too old"로 pose 변환에 실패→목표주행 abort(출발 데드락).
+    # TF 유효기간을 늘려 정지 상태에서도 controller가 pose를 변환하게 함.
+    transform_timeout: 1.5
     tf_buffer_duration: 10.0
 
     # ── 스캔 매칭/그래프 최적화 ─────────────────────────────
