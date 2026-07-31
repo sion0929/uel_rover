@@ -4,8 +4,8 @@
 
 odom_publisher:
   ros__parameters:
-    wheel_base:    0.30    # [m] 좌우 바퀴 중심 간격 (실측 후 수정)
-    wheel_radius:  0.065   # [m] 바퀴 반지름 (실측 후 수정)
+    wheel_base:    0.915   # [m] 유효 트랙폭(skid-steer scrub): 1차 0.981→5바퀴 실측 1678.6°/1800° 재보정
+    wheel_radius:  0.0877   # [m] 바퀴 반지름 (실측 후 수정)
 
 # ── 포트 설정 ──────────────────────────────────────────────────
 # OpenRB-150 → Jetson Orin USB: /dev/ttyACM0
