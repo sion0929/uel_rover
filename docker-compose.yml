@@ -56,6 +56,12 @@ services:
       - micro_ros_agent
       - zenoh_bridge
     network_mode: host
+    # /dev/shm을 호스트와 공유. 이게 없으면(IpcMode=private) fastdds가
+    # 같은 호스트로 인식해 SHM으로 통신하려다, 컨테이너/호스트 /dev/shm이
+    # 격리돼 데이터가 안 넘어간다. 증상: (1) 호스트 rviz가 토픽 목록은 보나
+    # 데이터 수신 0, (2) 호스트에 같은 도메인 ROS(rviz 등)가 뜨면 컨테이너
+    # 내부 slam↔lifecycle_manager bond heartbeat까지 깨져 SLAM이 죽는다.
+    ipc: host
     privileged: true            # RealSense USB 접근용
     environment:
       - ROS_DOMAIN_ID=0
