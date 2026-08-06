@@ -32,7 +32,7 @@ Visualization Manager:
       Description Topic:
         Value: /robot_description
         Durability Policy: Transient Local
-    - Class: nav2_rviz_plugins/Path
+    - Class: rviz_default_plugins/Path
       Name: Nav2 Path
       Enabled: true
       Topic:
