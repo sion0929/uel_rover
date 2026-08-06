@@ -1,0 +1,17 @@
+[Unit]
+Description=UEL Rover - odom_publisher + Nav2 + SLAM + RealSense (mapping)
+After=uel-rover-zenoh-bridge.service uel-rover-micro-ros-agent.service network-online.target
+Requires=uel-rover-zenoh-bridge.service uel-rover-micro-ros-agent.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=__USER__
+WorkingDirectory=__REPO_DIR__
+Environment=ROS_DOMAIN_ID=0
+ExecStart=/bin/bash -c 'source /opt/ros/jazzy/setup.bash && source __REPO_DIR__/install/setup.bash && exec ros2 launch uel_rover_control mapping.launch.py'
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

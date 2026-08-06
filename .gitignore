@@ -1,6 +1,7 @@
 build/
 install/
 log/
+microros_ws/
 .vscode/browse.vc.db*
 maps/
 __pycache__/

@@ -8,8 +8,8 @@
 ```
 OpenRB-150(펌웨어)  ─USB 시리얼(XRCE-DDS)─  [젯슨 오린]  ─WiFi(Zenoh)─  [개발 PC]
  · 바퀴 엔코더                                · 센서/SLAM/Nav2 연산         · rviz2 시각화
- · 모터 드라이버                              · 전부 Docker, headless       · 목표점 지정
- · RC 수신(FS-iA10B ch5)
+ · 모터 드라이버                              · 전부 네이티브 실행,         · 목표점 지정
+ · RC 수신(FS-iA10B ch5)                       systemd 3종으로 상시 구동
 ```
 
 ## 2. 노드(모듈) 목록과 역할
