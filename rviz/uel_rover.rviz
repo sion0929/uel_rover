@@ -24,6 +24,8 @@ Visualization Manager:
       Enabled: true
       Topic:
         Value: /scan
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
     - Class: rviz_default_plugins/RobotModel
       Name: RobotModel
       Enabled: true
@@ -35,6 +37,21 @@ Visualization Manager:
       Enabled: true
       Topic:
         Value: /plan
+    - Class: rviz_default_plugins/Image
+      Name: Camera Image
+      Enabled: true
+      Topic:
+        Value: /camera/camera/color/image_raw
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Depth Cloud
+      Enabled: false            # 무거움(640x480 pointcloud 렌더링→젯슨 CPU 폭증).
+                                # 필요할 때만 rviz에서 체크해서 켤 것.
+      Topic:
+        Value: /camera/camera/depth/color/points
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
   Tools:
     - Class: rviz_default_plugins/MoveCamera
     - Class: rviz_default_plugins/SetInitialPose

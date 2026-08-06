@@ -18,7 +18,6 @@ OpenRB-150(펌웨어)  ─USB 시리얼(XRCE-DDS)─  [젯슨 오린]  ─WiFi(Z
 | 노드 | 구현 | 역할 |
 |------|------|------|
 | `odom_publisher` | `src/odom_publisher.cpp` | 바퀴 RPM → 오도메트리 계산 |
-| `mode_manager` | `src/mode_manager.cpp` | RC/AUTO/STOP에 따라 모터 명령 게이팅 |
 
 ### 젯슨 — 외부 패키지 노드 (설치본 사용)
 | 노드 | 패키지 | 역할 |
@@ -51,14 +50,13 @@ OpenRB-150(펌웨어)  ─USB 시리얼(XRCE-DDS)─  [젯슨 오린]  ─WiFi(Z
 | `/wheel_velocity` | Float32MultiArray `[vL_rpm, vR_rpm]` | OpenRB-150(agent 경유) | `odom_publisher` |
 | `/drive_mode` | String `"RC"/"AUTO"/"STOP"` | OpenRB-150(agent 경유) | `mode_manager` |
 | `/odom` | nav_msgs/Odometry | `odom_publisher` | Nav2(참조) |
-| `/camera/depth/color/points` | PointCloud2 | `camera` | `pointcloud_to_laserscan` |
+| `/camera/camera/depth/color/points` | PointCloud2 | `camera` | `pointcloud_to_laserscan` |
 | `/scan` | LaserScan | `pointcloud_to_laserscan` | slam_toolbox / amcl / costmap |
 | `/map` | OccupancyGrid | slam_toolbox(매핑) 또는 map_server(주행) | amcl, global_costmap, rviz2 |
 | `/goal_pose` | PoseStamped | **rviz2 (2D Goal Pose)** | `bt_navigator` |
 | `/initialpose` | PoseWithCovarianceStamped | **rviz2 (2D Pose Estimate)** | `amcl` |
 | `/plan` | Path | `planner_server` | rviz2 |
-| `/cmd_vel` | Twist(비-stamped) | `controller_server` | `mode_manager` |
-| `/cmd_vel_out` | Twist | `mode_manager` | OpenRB-150(agent 경유) |
+| `/cmd_vel_out` | Twist(비-stamped) | `controller_server` (remap: `cmd_vel`→`/cmd_vel_out`) | OpenRB-150(agent 경유) |
 
 ## 4. TF 트리 (좌표계 연결)
 
@@ -90,10 +88,16 @@ rviz2 "2D Goal Pose" → /goal_pose → bt_navigator → planner_server(/plan)
 
 ## 6. 드라이브 모드 게이팅 (안전 스위치)
 
-`mode_manager`가 `/cmd_vel`(Nav2) → `/cmd_vel_out`(모터) 경로를 제어:
-- **RC** : Nav2 명령 무시(수동 조종). 매핑은 이 모드로 주행.
-- **AUTO** : `/cmd_vel` → `/cmd_vel_out` 통과 (rviz2 목표점으로 자율주행).
+게이팅은 OpenRB-150(MCU) 단일 지점에서 일어난다. MCU가 RC 채널(ch5)을 직접 읽어
+`RC`/`AUTO`/`STOP`을 판정하고, `/cmd_vel_out`(Nav2 `controller_server`가 remap으로
+직접 발행)을 다음과 같이 처리한다:
+- **RC** : `/cmd_vel_out` 무시, RC 채널 값으로 직접 구동(수동 조종). 매핑은 이 모드로 주행.
+- **AUTO** : `/cmd_vel_out` 그대로 적용 (rviz2 목표점으로 자율주행).
 - **STOP** : 즉시 정지.
+
+Jetson 쪽엔 이 게이팅을 중계하는 노드가 없다(2026-07-22 `mode_manager` 제거 이후
+MCU 단일 게이팅으로 일원화). `/drive_mode`는 MCU가 계속 발행하며 관측용으로
+rviz2/rqt에서 직접 구독 가능하다.
 
 → Nav2가 폭주해도 조종기 스위치를 RC/STOP으로 넘기면 즉시 회수(데드맨). SLAM은
 이 게이팅과 무관하게 항상 동작(odom·scan은 계속 흐름).

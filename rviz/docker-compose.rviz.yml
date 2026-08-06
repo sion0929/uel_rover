@@ -9,6 +9,7 @@ services:
     network_mode: host
     environment:
       - ROS_DOMAIN_ID=0
+      - ROS_DISTRO=jazzy
     command: ["-e", "tcp/192.168.0.112:7447"]
     restart: unless-stopped
 

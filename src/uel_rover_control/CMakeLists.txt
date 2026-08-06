@@ -19,15 +19,12 @@ include_directories(include)
 
 # ── 노드 빌드 ────────────────────────────────────────────────────
 add_executable(odom_publisher src/odom_publisher.cpp)
-add_executable(mode_manager   src/mode_manager.cpp)
 
 ament_target_dependencies(odom_publisher rclcpp nav_msgs std_msgs tf2_ros tf2 geometry_msgs)
-ament_target_dependencies(mode_manager   rclcpp geometry_msgs std_msgs)
 
 # ── 설치 ─────────────────────────────────────────────────────────
 install(TARGETS
   odom_publisher
-  mode_manager
   DESTINATION lib/${PROJECT_NAME}
 )
 

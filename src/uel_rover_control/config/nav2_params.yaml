@@ -66,7 +66,10 @@ controller_server:
       vy_samples: 0
       vtheta_samples: 20
       sim_time: 1.5
-      transform_tolerance: 0.2
+      # slam map→odom TF가 정지 시 stale이 되므로(transform_timeout 참고)
+      # controller가 낡은 TF도 허용하도록 tolerance 상향. 0.2s면 정지 상태에서
+      # pose 변환 실패로 목표주행이 시작조차 못 함.
+      transform_tolerance: 1.5
       critics: ["RotateToGoal", "Oscillation", "BaseObstacle", "GoalAlign",
                 "PathAlign", "PathDist", "GoalDist"]
       BaseObstacle.scale: 0.02
@@ -84,6 +87,7 @@ local_costmap:
       publish_frequency: 2.0
       global_frame: odom
       robot_base_frame: base_link
+      transform_tolerance: 1.5   # slam map→odom TF stale 대응 (transform_timeout 참고)
       rolling_window: true
       width: 3
       height: 3
@@ -117,6 +121,7 @@ global_costmap:
       publish_frequency: 1.0
       global_frame: map
       robot_base_frame: base_link
+      transform_tolerance: 1.5   # slam map→odom TF stale 대응 (transform_timeout 참고)
       rolling_window: true
       width: 20
       height: 20
@@ -160,7 +165,7 @@ behavior_server:
     local_frame: odom
     global_frame: map
     robot_base_frame: base_link
-    transform_tolerance: 0.1
+    transform_tolerance: 1.5   # slam map→odom TF stale 대응 (transform_timeout 참고)
     behavior_plugins: ["spin", "backup", "drive_on_heading", "wait"]
     spin:
       plugin: "nav2_behaviors::Spin"

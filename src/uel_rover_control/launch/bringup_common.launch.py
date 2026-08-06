@@ -35,8 +35,6 @@ def generate_launch_description():
         # ── 로버 기본 노드 ────────────────────────────────────────
         Node(package='uel_rover_control', executable='odom_publisher',
              name='odom_publisher', output='screen', parameters=[params]),
-        Node(package='uel_rover_control', executable='mode_manager',
-             name='mode_manager', output='screen', parameters=[params]),
 
         # ── URDF → TF ─────────────────────────────────────────────
         Node(package='robot_state_publisher', executable='robot_state_publisher',
@@ -45,16 +43,20 @@ def generate_launch_description():
                           'use_sim_time': use_sim_time}]),
 
         # ── RealSense D455 ────────────────────────────────────────
+        # namespace='camera' + name='camera' → 토픽이 /camera/camera/... 로
+        # 발행된다. 이게 없으면 /camera/... 한 겹만 나와서 아래
+        # pointcloud_to_laserscan의 cloud_in remap(/camera/camera/...)과
+        # 어긋나 /scan이 생성되지 않는다(SLAM 입력 끊김).
         Node(package='realsense2_camera', executable='realsense2_camera_node',
-             name='camera', output='screen',
+             namespace='camera', name='camera', output='screen',
              parameters=[{
                  'initial_reset': True,
                  'enable_depth': True,
                  'enable_color': True,
                  'enable_infra1': False,
                  'enable_infra2': False,
-                 'pointcloud.enable': True,
-                 'align_depth.enable': True,   # 컬러 포인트클라우드는 정렬 depth 기반 (필수)
+                 'pointcloud__neon_.enable': True,   # realsense-ros __neon_ 파라미터 버그
+                                                       # (IntelRealSense/realsense-ros #3397)
                  'enable_sync': True,
                  'depth_module.depth_profile': '640x480x30',
                  'rgb_camera.color_profile': '640x480x30',
@@ -72,18 +74,28 @@ def generate_launch_description():
 
         # ── Nav2 핵심 서버 ────────────────────────────────────────
         Node(package='nav2_controller', executable='controller_server',
-             name='controller_server', output='screen', parameters=[nav2_params]),
+             name='controller_server', output='screen', parameters=[nav2_params],
+             remappings=[('cmd_vel', '/cmd_vel_out')]),
         Node(package='nav2_planner', executable='planner_server',
              name='planner_server', output='screen', parameters=[nav2_params]),
+        # 복구 동작(spin/backup/drive_on_heading)도 controller_server와 같은
+        # 경로로 나가야 한다. remap이 없으면 /cmd_vel로 발행되는데 구독자가
+        # 없어(MCU는 /cmd_vel_out만 구독) 복구 명령이 버려진다.
         Node(package='nav2_behaviors', executable='behavior_server',
-             name='behavior_server', output='screen', parameters=[nav2_params]),
+             name='behavior_server', output='screen', parameters=[nav2_params],
+             remappings=[('cmd_vel', '/cmd_vel_out')]),
         Node(package='nav2_bt_navigator', executable='bt_navigator',
              name='bt_navigator', output='screen', parameters=[nav2_params]),
         Node(package='nav2_waypoint_follower', executable='waypoint_follower',
              name='waypoint_follower', output='screen', parameters=[nav2_params]),
 
         # ── Nav2 라이프사이클 매니저 (Nav2 서버만 관리) ───────────
+        # bond_timeout: 재부팅 직후 부하로 nav2 서버 activate가 느리면 기본
+        #   4s 안에 bond를 못 맺어 bringup이 abort된다. 여유를 크게 준다.
         Node(package='nav2_lifecycle_manager', executable='lifecycle_manager',
              name='lifecycle_manager_navigation', output='screen',
-             parameters=[{'autostart': True, 'node_names': nav2_lifecycle_nodes}]),
+             parameters=[{'autostart': True, 'node_names': nav2_lifecycle_nodes,
+                          'bond_timeout': 30.0,
+                          'attempt_respawn_reconnection': True,
+                          'bond_respawn_max_duration': 60.0}]),
     ])
