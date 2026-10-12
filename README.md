@@ -1,9 +1,9 @@
-# spacek 가제보 시뮬레이션
+# uel_rover
 
 드론(PX4) + 스키드 조향 로버 + 로버 위 착륙 플랫폼을 Gazebo Harmonic 에서 돌리는 ROS 2 Jazzy 워크스페이스.
 드론과 로버의 하드웨어 값은 실기체에 맞춰 두었다 (아래 "하드웨어 값의 원본").
 
-설치·빌드·실행: [LINUX_SETUP.md](LINUX_SETUP.md)
+설치·빌드·실행: [LINUX_SETUP.md](LINUX_SETUP.md) — 저장소를 colcon 워크스페이스 `~/ros2_ws` 로 클론해서 쓴다.
 
 ## 패키지
 

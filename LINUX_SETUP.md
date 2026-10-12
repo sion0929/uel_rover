@@ -11,7 +11,7 @@
 ## 1. 받기
 
 ```bash
-git clone <저장소 URL> ~/ros2_ws          # -> ~/ros2_ws/src/...
+git clone https://github.com/sion0929/uel_rover.git ~/ros2_ws   # -> ~/ros2_ws/src/...
 ```
 
 ## 2. 의존성 (처음 한 번)
