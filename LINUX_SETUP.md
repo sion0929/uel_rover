@@ -1,6 +1,6 @@
 # 리눅스 PC 설치/실행 (Ubuntu 24.04 + ROS 2 Jazzy + Gazebo Harmonic + PX4 v1.17)
 
-이 저장소 = colcon 워크스페이스 `ros2_ws` 의 소스입니다 (build/install/log 는 각자 빌드).
+이 저장소 자체가 colcon 워크스페이스입니다 (`~/uel_rover`, build/install/log 는 각자 빌드).
 
 | 패키지 | 내용 |
 |---|---|
@@ -11,7 +11,7 @@
 ## 1. 받기
 
 ```bash
-git clone https://github.com/sion0929/uel_rover.git ~/ros2_ws   # -> ~/ros2_ws/src/...
+git clone https://github.com/sion0929/uel_rover.git ~/uel_rover   # -> ~/uel_rover/src/...
 ```
 
 ## 2. 의존성 (처음 한 번)
@@ -21,13 +21,13 @@ ROS 2 Jazzy 설치: https://docs.ros.org/en/jazzy/Installation/Ubuntu-Install-De
 ```bash
 sudo apt install -y ros-jazzy-ros-gz ros-jazzy-teleop-twist-keyboard python3-yaml python3-pytest python3-opencv
 source /opt/ros/jazzy/setup.bash
-cd ~/ros2_ws && rosdep install --from-paths src --ignore-src -y
+cd ~/uel_rover && rosdep install --from-paths src --ignore-src -y
 ```
 
 ## 3. 빌드 + 시험
 
 ```bash
-cd ~/ros2_ws
+cd ~/uel_rover
 colcon build --packages-select spacek_rover drone_landing_platform spacek_drone_sim
 source install/setup.bash
 colcon test --packages-select spacek_rover drone_landing_platform spacek_drone_sim && colcon test-result --verbose
@@ -41,8 +41,8 @@ colcon test --packages-select spacek_rover drone_landing_platform spacek_drone_s
 > 다시 정리합니다. 아래 스크립트는 그 전의 순정 PX4 v1.17.0 기준입니다. 지금 검증된 것은 `px4:=false` 모드입니다.
 
 ```bash
-bash ~/ros2_ws/install/spacek_drone_sim/share/spacek_drone_sim/scripts/setup_px4.sh
-cd ~/ros2_ws && colcon build && source install/setup.bash     # 내려받은 px4_msgs 까지 빌드
+bash ~/uel_rover/install/spacek_drone_sim/share/spacek_drone_sim/scripts/setup_px4.sh
+cd ~/uel_rover && colcon build && source install/setup.bash     # 내려받은 px4_msgs 까지 빌드
 ```
 PX4-Autopilot v1.17.0 (`~/PX4-Autopilot`), Micro XRCE-DDS Agent v2.4.3, `px4_msgs` (release/1.17) 를 준비합니다.
 

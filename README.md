@@ -3,7 +3,7 @@
 드론(PX4) + 스키드 조향 로버 + 로버 위 착륙 플랫폼을 Gazebo Harmonic 에서 돌리는 ROS 2 Jazzy 워크스페이스.
 드론과 로버의 하드웨어 값은 실기체에 맞춰 두었다 (아래 "하드웨어 값의 원본").
 
-설치·빌드·실행: [LINUX_SETUP.md](LINUX_SETUP.md) — 저장소를 colcon 워크스페이스 `~/ros2_ws` 로 클론해서 쓴다.
+설치·빌드·실행: [LINUX_SETUP.md](LINUX_SETUP.md) — 저장소(`~/uel_rover`)가 그대로 colcon 워크스페이스다.
 
 ## 패키지
 
@@ -16,7 +16,7 @@
 ## 빠른 시작 (PX4 없이)
 
 ```bash
-cd ~/ros2_ws && source /opt/ros/jazzy/setup.bash
+cd ~/uel_rover && source /opt/ros/jazzy/setup.bash
 colcon build && source install/setup.bash
 ros2 launch spacek_drone_sim px4_rover_landing.launch.py px4:=false     # 드론·로버·플랫폼, 카메라 토픽
 ros2 run teleop_twist_keyboard teleop_twist_keyboard --ros-args -r cmd_vel:=/rover/cmd_vel

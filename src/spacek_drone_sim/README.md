@@ -2,7 +2,7 @@
 
 대회 기체(Pixhawk 6X + PX4)를 **PX4 SITL** 로 나는 가제보 모델 `spacek_drone` 과 로버 플랫폼 마커 5개 (3a단계).
 명령 하나로 가제보 + 로버(플랫폼 장착) + 드론 + PX4 + ROS 2 연결이 뜬다.
-설계: `ros2_ws/docs/superpowers/specs/2026-10-09-px4-drone-testbed-design.md`
+설계: `docs/superpowers/specs/2026-10-09-px4-drone-testbed-design.md`
 
 ## 1. 무엇이 있나
 
@@ -45,12 +45,12 @@ CAD 확인: `로버플랫폼프로토타입/로버_가제보/drone_gazebo.SLDASM
 ## 2. 1회 준비 (리눅스 PC)
 
 ```bash
-cd ~/ros2_ws && colcon build --packages-select spacek_rover drone_landing_platform spacek_drone_sim
+cd ~/uel_rover && colcon build --packages-select spacek_rover drone_landing_platform spacek_drone_sim
 source install/setup.bash
 bash install/spacek_drone_sim/share/spacek_drone_sim/scripts/setup_px4.sh   # PX4 빌드 20~30분
-cd ~/ros2_ws && colcon build && source install/setup.bash                    # px4_msgs 포함 다시 빌드
+cd ~/uel_rover && colcon build && source install/setup.bash                    # px4_msgs 포함 다시 빌드
 ```
-`PX4_DIR`, `WS_DIR` 환경변수로 위치를 바꿀 수 있다 (기본 `~/PX4-Autopilot`, `~/ros2_ws`). 인터넷 필요.
+`PX4_DIR`, `WS_DIR` 환경변수로 위치를 바꿀 수 있다 (기본 `~/PX4-Autopilot`, `~/uel_rover`). 인터넷 필요.
 
 ## 3. 실행
 

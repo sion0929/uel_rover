@@ -5,7 +5,7 @@
 #   3) px4_msgs (release/1.17) 를 워크스페이스 src 에 내려받기
 # 기체 설정 파일(4901_gz_spacek_drone)은 실행할 때마다 launch 가 drone.yaml 로 새로 써 넣는다.
 #
-# 사용:  bash setup_px4.sh                              (PX4_DIR=~/PX4-Autopilot, WS_DIR=~/ros2_ws)
+# 사용:  bash setup_px4.sh                              (PX4_DIR=~/PX4-Autopilot, WS_DIR=~/uel_rover)
 #        PX4_DIR=/opt/PX4-Autopilot WS_DIR=~/ws bash setup_px4.sh
 set -euo pipefail
 
@@ -13,7 +13,7 @@ PX4_TAG="v1.17.0"
 PX4_MSGS_BRANCH="release/1.17"
 XRCE_TAG="v2.4.3"
 PX4_DIR="${PX4_DIR:-$HOME/PX4-Autopilot}"
-WS_DIR="${WS_DIR:-$HOME/ros2_ws}"
+WS_DIR="${WS_DIR:-$HOME/uel_rover}"
 
 echo "[1/3] PX4-Autopilot ${PX4_TAG} -> ${PX4_DIR}"
 if [ ! -d "${PX4_DIR}/.git" ]; then
