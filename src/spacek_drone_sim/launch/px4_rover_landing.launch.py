@@ -23,6 +23,7 @@ import xml.etree.ElementTree as ET
 from ament_index_python.packages import get_package_share_directory
 from drone_landing_platform import rover_mount
 from drone_landing_platform.sdf_tools import prepare_runtime_models
+from drone_landing_platform.zenoh_router import router_actions
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, EmitEvent, ExecuteProcess, LogInfo,
                             OpaqueFunction, RegisterEventHandler, SetEnvironmentVariable,
@@ -139,6 +140,7 @@ def launch_setup(context, *args, **kwargs):
         return []
 
     actions = [
+        *router_actions(),
         LogInfo(msg='[px4_rover_landing] PX4=%s airframe=%s drone_start=%s (%.3f, %.3f, %.3f) '
                     '마커 %d개 (%s) gui=%s'
                     % (px4['root'] if use_px4 else '사용 안 함 (px4:=false)', airframe,

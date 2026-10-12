@@ -4,7 +4,7 @@ import importlib.util
 import os
 
 from launch import LaunchContext
-from launch.actions import DeclareLaunchArgument, ExecuteProcess
+from launch.actions import DeclareLaunchArgument, ExecuteProcess, SetEnvironmentVariable
 from launch.substitutions import TextSubstitution
 from launch_ros.actions import Node
 import pytest
@@ -75,6 +75,7 @@ def _spawned_names(actions):
 
 def test_without_px4_spawns_models_and_skips_px4(tmp_path, monkeypatch):
     mod = _load_launch_module()
+    monkeypatch.setenv('RMW_IMPLEMENTATION', 'rmw_fastrtps_cpp')   # 라우터 없음 (셸 RMW 무관)
     no_px4 = str(tmp_path / 'no_px4_here')            # PX4 빌드가 없는 폴더
     actions = _run_setup(mod, tmp_path, monkeypatch, px4='false', px4_dir=no_px4)
     procs = _processes(actions)
@@ -82,6 +83,24 @@ def test_without_px4_spawns_models_and_skips_px4(tmp_path, monkeypatch):
     assert procs[0][1].endswith('rover_landing_px4.sdf')
     assert _spawned_names(actions) == ['rover_platform', 'spacek_drone']
     assert not os.path.exists(no_px4)                  # 기체 파일도 설치하지 않음
+
+
+def test_zenoh_router_starts_before_ros_nodes(tmp_path, monkeypatch):
+    # 라우터 없이 뜬 노드는 나중에 라우터가 떠도 구독이 살아나지 않아 접이판 명령이 끊긴다 (2026-10-12)
+    mod = _load_launch_module()
+    from drone_landing_platform import zenoh_router
+    monkeypatch.setenv('RMW_IMPLEMENTATION', 'rmw_zenoh_cpp')
+    monkeypatch.delenv('ZENOH_ROUTER_CHECK_ATTEMPTS', raising=False)
+    monkeypatch.setattr(zenoh_router, 'router_running', lambda **_kw: False)
+    actions = _run_setup(mod, tmp_path, monkeypatch, px4='false',
+                         px4_dir=str(tmp_path / 'no_px4_here'))
+    router = next(i for i, e in enumerate(actions)
+                  if isinstance(e, Node) and e.node_executable == 'rmw_zenohd')
+    first_node = next(i for i, e in enumerate(actions)
+                      if isinstance(e, Node) and e.node_executable != 'rmw_zenohd')
+    wait = next(i for i, e in enumerate(actions) if isinstance(e, SetEnvironmentVariable)
+                and _text(e.name) == 'ZENOH_ROUTER_CHECK_ATTEMPTS')
+    assert router < first_node and wait < first_node
 
 
 def test_with_px4_still_requires_px4_build(tmp_path, monkeypatch):

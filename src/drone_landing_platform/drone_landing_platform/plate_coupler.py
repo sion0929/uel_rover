@@ -11,10 +11,13 @@ import math
 from drone_landing_platform.coupling import make_coupling, relative_command_rad
 from rcl_interfaces.msg import ParameterDescriptor
 import rclpy
+from rclpy.clock import Clock, ClockType
 from rclpy.executors import ExternalShutdownException
 from rclpy.node import Node
 from sensor_msgs.msg import JointState
 from std_msgs.msg import Float64
+
+STATE_TIMEOUT_S = 10.0     # 시작 후 이 시간 안에 조인트 상태가 없으면 오류 로그
 
 
 class PlateCoupler(Node):
@@ -49,6 +52,11 @@ class PlateCoupler(Node):
         self.last_pub_t = None
         self.last_log_t = None
         self.warned = False
+        self.got_state = False
+        # 브리지와 못 만나면 (예: rmw_zenoh_cpp 인데 라우터 없음) 바닥만 내려가고 접이판은 그대로다.
+        # 그때는 /clock 도 안 오므로 벽시계로 한 번 확인한다.
+        self.state_check = self.create_timer(
+            STATE_TIMEOUT_S, self._check_state, clock=Clock(clock_type=ClockType.STEADY_TIME))
         th0 = self.coupling.theta_deg(0.0)
         self.get_logger().info(
             '커플링 mode=%s, theta(0)=%.3f deg, SDF 0점=%.3f deg, 명령 토픽=%s<joint>/cmd_pos'
@@ -58,7 +66,16 @@ class PlateCoupler(Node):
         self.declare_parameter(name, default, ParameterDescriptor(dynamic_typing=True))
         return self.get_parameter(name).value
 
+    def _check_state(self):
+        self.state_check.cancel()
+        if not self.got_state:
+            self.get_logger().error(
+                '%.0f s 동안 %s 를 못 받았습니다 -> 접이판이 움직이지 않습니다. ros_gz_bridge 와 RMW 를 '
+                '확인하세요 (rmw_zenoh_cpp 이면 rmw_zenohd 라우터가 노드보다 먼저 떠 있어야 함)'
+                % (STATE_TIMEOUT_S, self.topic))
+
     def _on_state(self, msg):
+        self.got_state = True
         if self.floor_joint not in msg.name:
             if not self.warned:
                 self.get_logger().warning('%s 가 %s 에 없습니다' % (self.floor_joint, self.topic))

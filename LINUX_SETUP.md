@@ -77,7 +77,8 @@ ros2 launch spacek_drone_sim px4_rover_landing.launch.py drone_start:=platform m
 
 * GUI 가 느리거나 검은 화면: `export LIBGL_ALWAYS_SOFTWARE=1` 또는 `gui:=false` (3a단계 카메라는 그래픽카드 필요)
 * NVIDIA 드라이버 자동 업데이트 뒤 재부팅 전이면 `Driver/library version mismatch` 로 GUI·카메라가 죽습니다 → 재부팅
-* 셸 기본 RMW 가 `rmw_zenoh_cpp` 이면 라우터 없이 토픽이 안 보입니다 → `export RMW_IMPLEMENTATION=rmw_fastrtps_cpp`
+* 셸 기본 RMW 가 `rmw_zenoh_cpp` 이면 launch 가 Zenoh 라우터를 노드보다 먼저 띄웁니다. 라우터 없이 뜬 노드는 나중에 라우터를 켜도
+  브리지가 명령을 못 받아 접이판이 서지 않습니다 (`plate_coupler` 가 10 s 뒤 오류 로그). PX4 `/fmu/...` 는 `rmw_fastrtps_cpp` 필요
 * 다른 PC 의 gz 와 섞일 때: `export GZ_IP=127.0.0.1`
 * `PX4 SITL 빌드를 찾을 수 없습니다` → 4절 스크립트를 실행했는지, `px4_dir:=<경로>` 확인
 * 마커가 안 읽힘 (`marker_probe`) → `src/spacek_drone_sim/config/markers.yaml` 의 `flip_v: true`

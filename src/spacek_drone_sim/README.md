@@ -60,8 +60,8 @@ ros2 launch spacek_drone_sim px4_rover_landing.launch.py drone_start:=platform  
 ros2 launch spacek_drone_sim px4_rover_landing.launch.py px4:=false             # PX4 없이 모델만
 ```
 
-ROS 2 노드끼리 토픽이 보이려면 모든 터미널에서 `export RMW_IMPLEMENTATION=rmw_fastrtps_cpp`
-(셸 기본이 `rmw_zenoh_cpp` 이면 라우터 없이는 서로 안 보이고, PX4 XRCE-DDS 와도 안 맞음).
+셸 RMW 가 `rmw_zenoh_cpp` 이면 launch 가 Zenoh 라우터(`rmw_zenohd`)를 노드보다 먼저 띄운다 (이미 떠 있으면 그것을 씀).
+PX4 XRCE-DDS(`/fmu/...`)를 ROS 2 에서 보려면 모든 터미널에서 `export RMW_IMPLEMENTATION=rmw_fastrtps_cpp`.
 
 | 인자 | 기본 | 설명 |
 |---|---|---|

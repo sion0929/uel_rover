@@ -27,6 +27,7 @@ from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
 from spacek_rover.rover_params import derive, load_config, spawn_height
 from spacek_rover.sdf_tools import MODEL_NAME, prepare_runtime_model
+from spacek_rover.zenoh_router import router_actions
 
 PKG = 'spacek_rover'
 WORLD_NAME = 'rover_test'
@@ -78,6 +79,7 @@ def launch_setup(context, *args, **kwargs):
 
     turn_note = '' if params['turn_margin'] > 1.0 else ' (경고: 1 이하 -> 제자리 선회 불가)'
     actions = [
+        *router_actions(),
         LogInfo(msg='[rover_sim] base %.2f kg + 4 x %.2f kg, wheel effort %.2f N m, '
                     'v_max %.3f m/s, w_max %.3f rad/s, mu long/lat %.2f/%.2f, '
                     'turn_margin %.2f%s, visual=%s'

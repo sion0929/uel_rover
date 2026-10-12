@@ -23,6 +23,7 @@ import tempfile
 from ament_index_python.packages import get_package_share_directory
 from drone_landing_platform import rover_mount
 from drone_landing_platform.sdf_tools import prepare_runtime_models, spring_reference_m
+from drone_landing_platform.zenoh_router import router_actions
 from launch import LaunchDescription
 from launch.actions import (DeclareLaunchArgument, EmitEvent, ExecuteProcess, LogInfo,
                             OpaqueFunction, RegisterEventHandler, SetEnvironmentVariable,
@@ -192,6 +193,7 @@ def launch_setup(context, *args, **kwargs):
 
     spawn_delay = float(arg('spawn_delay'))
     actions = [
+        *router_actions(),
         LogInfo(msg='[landing_sim] scenario=%s mode=%s gui=%s rover=%s '
                     'spawn=(%.3f, %.3f, %.4f) m'
                     % (scenario, mode, gui, rover, spawn_x, spawn_y, spawn_z)),
