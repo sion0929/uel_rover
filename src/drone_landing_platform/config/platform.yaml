@@ -1,0 +1,40 @@
+# 플랫폼/드론 물리 파라미터 (ROS 파라미터 파일 아님: launch 가 읽어서 모델 SDF 를 실행 시 수정함)
+# 기본값은 SolidWorks Motion 모델과 동일하게 맞춤 (결과 비교용).
+
+suspension:
+  # RC 쇼바 #180007 x 2 (경사 장착)를 수직 등가 스프링 1개로 표현
+  stiffness_n_per_m: 250.0      # 등가 수직 강성 k
+  preload_n: 8.1                # 대기(d = 0)에서 스프링이 위로 미는 힘
+  damping_ns_per_m: 40.0        # 등가 감쇠 c
+  hard_stop_m: 0.0606           # 하단 스톱 (쇼바_경사스톱), 기구 최대 84 mm 는 사용 안 함
+  # Gazebo 보정: 실기에서는 플레이트 끝단 핀이 프레임 가이드(z = 135)에 얹혀 무게 일부를 프레임이
+  # 받는다. Gazebo 플레이트는 바닥에만 매달려 있으므로 그 몫을 스프링 예압에 더해 준다.
+  #   4 x (0.176 kg x 9.80665 - 0.90 N) = 3.30 N
+  #   -> 바닥 좌표에 걸리는 유효 하중 = 4.77 + 6.90 - 3.30 = 8.37 N (SolidWorks 8.4 N 과 일치)
+  # spring_reference = -(preload_n + plate_guide_support_n) / k = -0.0456 m
+  plate_guide_support_n: 3.30
+
+plate_controller:               # gz JointPositionController (플레이트 4개 공통)
+  p_gain: 30.0                  # [N m / rad]
+  i_gain: 0.0
+  d_gain: 0.3                   # [N m s / rad]
+  i_max: 0.5
+  cmd_max: 3.0                  # 최대 토크 [N m]
+
+drone:
+  mass_kg: 1.9                  # 1.674 기체 + 0.226 착륙 프레임 proxy (launch 인자 drone_mass 로 덮어쓰기 가능)
+  # 스폰 높이: 착륙기어 바닥이 프레임 윗면(z = 0.144) 위로 얼마나 떨어져 있는지 [m]
+  spawn_gap_closed_loop_m: 0.5  # closed_loop 모드: 0.5 m 위에서 정렬 후 하강
+  spawn_gap_openloop_m: 0.02    # sw_openloop 모드: SolidWorks 와 동일 (20 mm)
+
+geometry:                       # 플랫폼 좌표계 [m]
+  frame_top_z: 0.144
+  floor_top_standby_z: 0.1211
+  gear_bottom_to_origin_m: 0.1644
+
+frame:                          # 고정 프레임 링크 (로버 장착 시 로버 질량에 더해짐, 2단계)
+  # 출력 STL(출력/로버) 고정부 부피 827.5 cm3 x PLA 1.24 g/cm3 (100% 채움) = 1.026 kg
+  #   + 쇼바 2 x 50 g + 볼트/너트 20 g = 1.146 kg. 채움률이 낮으면 mass_kg 와 관성을 같은 비율로 줄인다.
+  mass_kg: 1.15
+  com_m: [0.0, 0.0, 0.0446]     # 플랫폼 좌표 (원점 = 베이스판 윗면 중심)
+  inertia_kgm2: [0.0188, 0.0188, 0.0323]   # ixx, iyy, izz (부품 상자 + 평행축)

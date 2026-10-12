@@ -1,0 +1,77 @@
+# ros_gz_bridge parameter_bridge 설정 (월드 이름 landing_test 고정)
+# 주의: ROS 2 토픽 이름은 숫자로 시작하는 토큰("/0/")을 허용하지 않으므로
+#       플레이트 명령은 ROS 쪽 이름을 /platform/<joint>/cmd_pos 로 바꿔서 연결한다.
+
+- ros_topic_name: /clock
+  gz_topic_name: /clock
+  ros_type_name: rosgraph_msgs/msg/Clock
+  gz_type_name: gz.msgs.Clock
+  direction: GZ_TO_ROS
+
+# ---- 플랫폼 조인트 상태 (floor_joint, plate_*_joint) ----
+- ros_topic_name: /joint_states
+  gz_topic_name: /world/landing_test/model/landing_platform/joint_state
+  ros_type_name: sensor_msgs/msg/JointState
+  gz_type_name: gz.msgs.Model
+  direction: GZ_TO_ROS
+
+# ---- 드론 조인트 상태 (drone_x, drone_y, drone_z, drone_yaw, drone_pitch, drone_roll) ----
+- ros_topic_name: /drone/joint_states
+  gz_topic_name: /world/landing_test/model/simple_drone/joint_state
+  ros_type_name: sensor_msgs/msg/JointState
+  gz_type_name: gz.msgs.Model
+  direction: GZ_TO_ROS
+
+# ---- 플레이트 위치 명령 (rad, 대기 = 0) ----
+- ros_topic_name: /platform/plate_px_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_px_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /platform/plate_mx_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_mx_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /platform/plate_py_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_py_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /platform/plate_my_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_my_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+
+# ---- 드론 가상 조인트 힘/토크 명령 (N 또는 N m) ----
+- ros_topic_name: /model/simple_drone/joint/drone_x/cmd_force
+  gz_topic_name: /model/simple_drone/joint/drone_x/cmd_force
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /model/simple_drone/joint/drone_y/cmd_force
+  gz_topic_name: /model/simple_drone/joint/drone_y/cmd_force
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /model/simple_drone/joint/drone_z/cmd_force
+  gz_topic_name: /model/simple_drone/joint/drone_z/cmd_force
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /model/simple_drone/joint/drone_yaw/cmd_force
+  gz_topic_name: /model/simple_drone/joint/drone_yaw/cmd_force
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /model/simple_drone/joint/drone_pitch/cmd_force
+  gz_topic_name: /model/simple_drone/joint/drone_pitch/cmd_force
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /model/simple_drone/joint/drone_roll/cmd_force
+  gz_topic_name: /model/simple_drone/joint/drone_roll/cmd_force
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ

@@ -1,0 +1,87 @@
+# ros_gz_bridge 설정: 3a단계 (월드 rover_landing_px4). PX4 센서는 PX4 가 가제보에서 직접 받는다.
+# 로버·플랫폼 항목은 drone_landing_platform/config/bridge_rover.yaml 과 같다 (test_world_bridge 가 검사).
+# 단 로버 TF(odom -> base_link) 는 /rover/tf 로 낸다: /tf 의 base_link 는 드론(카메라 정적 TF 의 부모) 몫.
+
+- ros_topic_name: /clock
+  gz_topic_name: /clock
+  ros_type_name: rosgraph_msgs/msg/Clock
+  gz_type_name: gz.msgs.Clock
+  direction: GZ_TO_ROS
+
+# ---- 플랫폼 조인트 상태 (floor_joint, plate_*_joint): 합칠 때 토픽을 명시함 ----
+- ros_topic_name: /joint_states
+  gz_topic_name: /model/landing_platform/joint_state
+  ros_type_name: sensor_msgs/msg/JointState
+  gz_type_name: gz.msgs.Model
+  direction: GZ_TO_ROS
+
+# ---- 플레이트 위치 명령 (rad, 대기 = 0) ----
+- ros_topic_name: /platform/plate_px_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_px_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /platform/plate_mx_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_mx_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /platform/plate_py_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_py_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+- ros_topic_name: /platform/plate_my_joint/cmd_pos
+  gz_topic_name: /model/landing_platform/joint/plate_my_joint/0/cmd_pos
+  ros_type_name: std_msgs/msg/Float64
+  gz_type_name: gz.msgs.Double
+  direction: ROS_TO_GZ
+
+# ---- 로버 (spacek_rover 와 같은 ROS 이름) ----
+- ros_topic_name: /rover/cmd_vel
+  gz_topic_name: /model/spacek_rover/cmd_vel
+  ros_type_name: geometry_msgs/msg/Twist
+  gz_type_name: gz.msgs.Twist
+  direction: ROS_TO_GZ
+- ros_topic_name: /rover/odom
+  gz_topic_name: /model/spacek_rover/odometry
+  ros_type_name: nav_msgs/msg/Odometry
+  gz_type_name: gz.msgs.Odometry
+  direction: GZ_TO_ROS
+- ros_topic_name: /rover/odom_gt
+  gz_topic_name: /model/spacek_rover/odometry_gt
+  ros_type_name: nav_msgs/msg/Odometry
+  gz_type_name: gz.msgs.Odometry
+  direction: GZ_TO_ROS
+- ros_topic_name: /rover/joint_states
+  gz_topic_name: /model/spacek_rover/joint_state
+  ros_type_name: sensor_msgs/msg/JointState
+  gz_type_name: gz.msgs.Model
+  direction: GZ_TO_ROS
+- ros_topic_name: /rover/tf
+  gz_topic_name: /model/spacek_rover/tf
+  ros_type_name: tf2_msgs/msg/TFMessage
+  gz_type_name: gz.msgs.Pose_V
+  direction: GZ_TO_ROS
+
+# ---- 드론 카메라 (spacek_drone, drone.yaml 의 gz_topic) ----
+- ros_topic_name: /drone/front_camera/image_raw
+  gz_topic_name: /drone/front_camera/image
+  ros_type_name: sensor_msgs/msg/Image
+  gz_type_name: gz.msgs.Image
+  direction: GZ_TO_ROS
+- ros_topic_name: /drone/front_camera/camera_info
+  gz_topic_name: /drone/front_camera/camera_info
+  ros_type_name: sensor_msgs/msg/CameraInfo
+  gz_type_name: gz.msgs.CameraInfo
+  direction: GZ_TO_ROS
+- ros_topic_name: /drone/down_camera/image_raw
+  gz_topic_name: /drone/down_camera/image
+  ros_type_name: sensor_msgs/msg/Image
+  gz_type_name: gz.msgs.Image
+  direction: GZ_TO_ROS
+- ros_topic_name: /drone/down_camera/camera_info
+  gz_topic_name: /drone/down_camera/camera_info
+  ros_type_name: sensor_msgs/msg/CameraInfo
+  gz_type_name: gz.msgs.CameraInfo
+  direction: GZ_TO_ROS

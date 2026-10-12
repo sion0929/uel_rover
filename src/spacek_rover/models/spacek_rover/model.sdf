@@ -1,0 +1,274 @@
+<?xml version="1.0"?>
+<!--
+  spacek 스키드 조향 로버 (Gazebo Harmonic / SDF 1.9)
+
+  좌표계: 모델 좌표계 = base_link. x 전방, y 왼쪽, z 위, 단위 m.
+          원점 = 바퀴 축 4개의 중심 (지면 위 = 유효 바퀴 반지름 0.0877 m, 메시는 CAD 0.08825).
+  SolidWorks 마스터(spacek rover.SLDPRT, Y-up, 전방 = -X) -> base_link [mm]:
+          x = -(X - 34.8713),  y = Z + 9.6801,  z = Y + 209.5403
+  메시: SolidWorks STL 내보내기는 형상을 "양의 공간"으로 평행이동한다 (STL = 마스터 + 오프셋, mm).
+          base.stl  오프셋 (266.8977, 233.6776, 155.6701), wheel.stl 오프셋 (288.3787, 297.7903, 243.2645)
+        visual pose = R(-오프셋 - 링크원점_마스터) / 1000, scale 0.001:
+          base       : xyz (0.301769, -0.14599, -0.0241373), rpy (pi/2, 0, pi)
+          오른쪽 바퀴: xyz (0.08825, -0.0437922, -0.08825),  rpy (pi/2, 0, pi)
+          왼쪽 바퀴  : 마스터에서 Z 미러 = 축대칭이므로 수직축 180 deg 회전 -> xyz (-0.08825, 0.0437922, -0.08825), rpy (pi/2, 0, 0)
+        (test_base_mesh_aligned_with_link / test_wheel_mesh_centered_on_axle 가 STL 과 pose 의 일치를 검사)
+  바퀴 조인트: 축 (0 1 0), 양의 회전 = 전진. effort = 스톨 토크(추정) / 같은 쪽 바퀴 수, velocity = 펌웨어 MAX_RPM 50.
+  바퀴 마찰: fdir1 = 0 0 1 (충돌 좌표 z = 원통 축 = 바퀴 축, 바퀴와 함께 회전) -> mu = 측면 0.5, mu2 = 굴림 0.9.
+    DART 는 두 방향 마찰을 따로 제한하므로 같은 값이면(축간/트랙 = 1.24) 바퀴만 헛돌고 선회하지 않는다.
+    선회 조건 mu2 x 0.19 > mu x 0.235 (rover_params turn_margin > 1). 지면과 결합 시 DART 는 두 면 중 작은 값을 쓴다.
+  아래 질량/관성/무게중심, 바퀴 마찰, 조인트 한계, DiffDrive 한계 = config/rover.yaml 기본값이며
+  launch 시 rover.yaml 값으로 덮어써진다 (test_default_sdf_matches_yaml 가 일치를 검사).
+-->
+<sdf version="1.9">
+  <model name="spacek_rover">
+    <static>false</static>
+    <self_collide>false</self_collide>
+
+    <!-- ================= 차체: 섀시 + 타공판 + 사이드 암 2개 (암 가운데 다이나믹셀 포함) ================= -->
+    <link name="base_link">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.00028 0 0.12578 0 0 0</pose>
+        <mass>16.0</mass>
+        <inertia><ixx>0.0735053</ixx><iyy>0.2498053</iyy><izz>0.2829667</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+
+      <!-- 섀시 박스 415 x 200 x 123 mm -->
+      <collision name="chassis_col">
+        <pose>-0.000341 0 0.135040 0 0 0</pose>
+        <geometry><box><size>0.415 0.200 0.123</size></box></geometry>
+        <surface><friction><ode><mu>0.5</mu><mu2>0.5</mu2></ode></friction></surface>
+      </collision>
+      <!-- 타공판 325 x 180 x 5 mm, 윗면 = platform_mount -->
+      <collision name="top_plate_col">
+        <pose>0.034659 0 0.212040 0 0 0</pose>
+        <geometry><box><size>0.325 0.180 0.005</size></box></geometry>
+        <surface><friction><ode><mu>0.5</mu><mu2>0.5</mu2></ode></friction></surface>
+      </collision>
+      <!-- 사이드 암 (∧): 가운데 수평부 + 앞/뒤 경사부(약 30 deg), 두께 40 mm, y = ±0.126 (정면 스크린숏 측정 ±5 mm) -->
+      <collision name="arm_left_center_col"><pose>-0.00318 0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry></collision>
+      <collision name="arm_left_front_col"><pose>0.14819 0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry></collision>
+      <collision name="arm_left_rear_col"><pose>-0.15137 0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry></collision>
+      <collision name="arm_right_center_col"><pose>-0.00318 -0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry></collision>
+      <collision name="arm_right_front_col"><pose>0.14819 -0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry></collision>
+      <collision name="arm_right_rear_col"><pose>-0.15137 -0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry></collision>
+
+      <!-- 박스 대체 비주얼 (메시가 없을 때) -->
+      <visual name="chassis_box_visual"><pose>-0.000341 0 0.135040 0 0 0</pose><geometry><box><size>0.415 0.200 0.123</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+      <visual name="top_plate_box_visual"><pose>0.034659 0 0.212040 0 0 0</pose><geometry><box><size>0.325 0.180 0.005</size></box></geometry><material><ambient>0.4 0.4 0.42 1</ambient><diffuse>0.65 0.65 0.68 1</diffuse></material></visual>
+      <visual name="arm_left_center_box_visual"><pose>-0.00318 0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+      <visual name="arm_left_front_box_visual"><pose>0.14819 0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+      <visual name="arm_left_rear_box_visual"><pose>-0.15137 0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+      <visual name="arm_right_center_box_visual"><pose>-0.00318 -0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+      <visual name="arm_right_front_box_visual"><pose>0.14819 -0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+      <visual name="arm_right_rear_box_visual"><pose>-0.15137 -0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+
+      <!-- 메시 비주얼 (STL = 마스터 + 오프셋, mm) -->
+      <visual name="base_mesh_visual">
+        <pose>0.301769 -0.14599 -0.0241373 1.5707963 0 3.1415927</pose>
+        <geometry><mesh><uri>model://spacek_rover/meshes/base.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material>
+      </visual>
+    </link>
+
+    <!-- 플랫폼 장착 프레임 (2단계에서 landing_platform 의 frame 을 여기에 고정) -->
+    <frame name="platform_mount" attached_to="base_link">
+      <pose relative_to="base_link">0.034659 0 0.214540 0 0 0</pose>
+    </frame>
+
+    <!-- ================= 바퀴 4개 (Ø176.5 x 87.58 mm, 1.0 kg). *_marker 는 회전이 보이도록 붙인 흰 표시 ================= -->
+    <link name="front_left_wheel">
+      <pose>0.235 0.1897922 0 0 0 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia><ixx>0.00256207</ixx><iyy>0.00384565</iyy><izz>0.00256207</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="front_left_wheel_col">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <surface><friction><ode><mu>0.5</mu><mu2>0.9</mu2><fdir1>0 0 1</fdir1></ode></friction></surface>
+      </collision>
+      <visual name="front_left_wheel_box_visual">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="front_left_wheel_mesh_visual">
+        <pose>-0.08825 0.0437922 -0.08825 1.5707963 0 0</pose>
+        <geometry><mesh><uri>model://spacek_rover/meshes/wheel.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="front_left_wheel_marker">
+        <pose>0 0.0449 0.05 0 0 0</pose>
+        <geometry><box><size>0.012 0.002 0.06</size></box></geometry>
+        <material><ambient>0.9 0.9 0.9 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material>
+      </visual>
+    </link>
+
+    <link name="front_right_wheel">
+      <pose>0.235 -0.1897922 0 0 0 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia><ixx>0.00256207</ixx><iyy>0.00384565</iyy><izz>0.00256207</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="front_right_wheel_col">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <surface><friction><ode><mu>0.5</mu><mu2>0.9</mu2><fdir1>0 0 1</fdir1></ode></friction></surface>
+      </collision>
+      <visual name="front_right_wheel_box_visual">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="front_right_wheel_mesh_visual">
+        <pose>0.08825 -0.0437922 -0.08825 1.5707963 0 3.1415927</pose>
+        <geometry><mesh><uri>model://spacek_rover/meshes/wheel.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="front_right_wheel_marker">
+        <pose>0 -0.0449 0.05 0 0 0</pose>
+        <geometry><box><size>0.012 0.002 0.06</size></box></geometry>
+        <material><ambient>0.9 0.9 0.9 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material>
+      </visual>
+    </link>
+
+    <link name="rear_left_wheel">
+      <pose>-0.235 0.1897922 0 0 0 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia><ixx>0.00256207</ixx><iyy>0.00384565</iyy><izz>0.00256207</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="rear_left_wheel_col">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <surface><friction><ode><mu>0.5</mu><mu2>0.9</mu2><fdir1>0 0 1</fdir1></ode></friction></surface>
+      </collision>
+      <visual name="rear_left_wheel_box_visual">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="rear_left_wheel_mesh_visual">
+        <pose>-0.08825 0.0437922 -0.08825 1.5707963 0 0</pose>
+        <geometry><mesh><uri>model://spacek_rover/meshes/wheel.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="rear_left_wheel_marker">
+        <pose>0 0.0449 0.05 0 0 0</pose>
+        <geometry><box><size>0.012 0.002 0.06</size></box></geometry>
+        <material><ambient>0.9 0.9 0.9 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material>
+      </visual>
+    </link>
+
+    <link name="rear_right_wheel">
+      <pose>-0.235 -0.1897922 0 0 0 0</pose>
+      <inertial>
+        <mass>1.0</mass>
+        <inertia><ixx>0.00256207</ixx><iyy>0.00384565</iyy><izz>0.00256207</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="rear_right_wheel_col">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <surface><friction><ode><mu>0.5</mu><mu2>0.9</mu2><fdir1>0 0 1</fdir1></ode></friction></surface>
+      </collision>
+      <visual name="rear_right_wheel_box_visual">
+        <pose>0 0 0 1.5707963 0 0</pose>
+        <geometry><cylinder><radius>0.0877</radius><length>0.0875844</length></cylinder></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="rear_right_wheel_mesh_visual">
+        <pose>0.08825 -0.0437922 -0.08825 1.5707963 0 3.1415927</pose>
+        <geometry><mesh><uri>model://spacek_rover/meshes/wheel.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.08 0.08 0.08 1</ambient><diffuse>0.15 0.15 0.15 1</diffuse></material>
+      </visual>
+      <visual name="rear_right_wheel_marker">
+        <pose>0 -0.0449 0.05 0 0 0</pose>
+        <geometry><box><size>0.012 0.002 0.06</size></box></geometry>
+        <material><ambient>0.9 0.9 0.9 1</ambient><diffuse>0.95 0.95 0.95 1</diffuse></material>
+      </visual>
+    </link>
+
+    <!-- ================= 바퀴 조인트: 축 +y, 양의 회전 = 전진. effort 5.3 N m = XM540-W270 스톨 10.6 / 바퀴 2 ================= -->
+    <joint name="front_left_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>front_left_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper><effort>5.3</effort><velocity>5.23598776</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+    <joint name="front_right_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>front_right_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper><effort>5.3</effort><velocity>5.23598776</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+    <joint name="rear_left_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rear_left_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper><effort>5.3</effort><velocity>5.23598776</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+    <joint name="rear_right_wheel_joint" type="revolute">
+      <parent>base_link</parent>
+      <child>rear_right_wheel</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-1e16</lower><upper>1e16</upper><effort>5.3</effort><velocity>5.23598776</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+
+    <!-- ================= 구동: 다이나믹셀 1개 = 같은 쪽 바퀴 2개 (같은 속도 명령) ================= -->
+    <plugin filename="gz-sim-diff-drive-system" name="gz::sim::systems::DiffDrive">
+      <left_joint>front_left_wheel_joint</left_joint>
+      <left_joint>rear_left_wheel_joint</left_joint>
+      <right_joint>front_right_wheel_joint</right_joint>
+      <right_joint>rear_right_wheel_joint</right_joint>
+      <wheel_separation>0.3795844</wheel_separation>
+      <wheel_radius>0.0877</wheel_radius>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <topic>/model/spacek_rover/cmd_vel</topic>
+      <odom_topic>/model/spacek_rover/odometry</odom_topic>
+      <tf_topic>/model/spacek_rover/tf</tf_topic>
+      <frame_id>odom</frame_id>
+      <child_frame_id>base_link</child_frame_id>
+      <max_linear_velocity>0.4591961</max_linear_velocity>
+      <min_linear_velocity>-0.4591961</min_linear_velocity>
+      <max_angular_velocity>2.4194679</max_angular_velocity>
+      <min_angular_velocity>-2.4194679</min_angular_velocity>
+      <max_linear_acceleration>0.5</max_linear_acceleration>
+      <min_linear_acceleration>-0.5</min_linear_acceleration>
+      <max_angular_acceleration>2.0</max_angular_acceleration>
+      <min_angular_acceleration>-2.0</min_angular_acceleration>
+    </plugin>
+
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+      <joint_name>front_left_wheel_joint</joint_name>
+      <joint_name>front_right_wheel_joint</joint_name>
+      <joint_name>rear_left_wheel_joint</joint_name>
+      <joint_name>rear_right_wheel_joint</joint_name>
+      <update_rate>50</update_rate>
+    </plugin>
+
+    <!-- 실제 위치 (월드 기준, 3D). DiffDrive 와 기본 토픽이 같으므로 이름을 따로 준다 -->
+    <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+      <odom_frame>world</odom_frame>
+      <robot_base_frame>base_link</robot_base_frame>
+      <odom_publish_frequency>50</odom_publish_frequency>
+      <odom_topic>/model/spacek_rover/odometry_gt</odom_topic>
+      <odom_covariance_topic>/model/spacek_rover/odometry_gt_with_covariance</odom_covariance_topic>
+      <tf_topic>/model/spacek_rover/pose_gt</tf_topic>
+      <dimensions>3</dimensions>
+    </plugin>
+  </model>
+</sdf>

@@ -1,0 +1,102 @@
+# spacek_drone: 대회 기체 (Pixhawk 6X + PX4). 단일 원본 - 드론 SDF 와 PX4 기체 설정 파일이 이 값을 따른다.
+# 좌표: 원점 = 기체 중심, +X 앞, Y 왼쪽, Z 위 (가제보 FLU), 단위 m / rad / kg.
+mass_kg: 1.9                    # 모든 센서·배터리 포함 실측 (사용자 2026-10-09)
+com_m: [0.0, 0.0, -0.00911]
+inertia_kgm2: [0.01203, 0.01203, 0.01956]
+gear_bottom_z_m: -0.1644        # 하부 프레임(6S5200) 발 바닥
+collision:                      # 하부 프레임 상자 (1·2단계와 같음)
+  size_m: [0.184, 0.183, 0.160]
+  center_m: [0.0, 0.0, -0.0844]
+  mu: 0.3
+visual:
+  drone_mesh_yaw_rad: 0.0       # CAD +X = 앞 (H-Flow 자리가 -X, 전방 카메라가 +X 쪽, Task 2 확인)
+rotors:
+  arm_xy_m: 0.1329              # 모터 축 (±, ±)
+  z_m: 0.030                    # 프로펠러 면 (프롭가드 안)
+  mass_kg: 0.016077             # x500 로터
+  inertia_kgm2: [3.8465e-07, 2.6116e-05, 2.6499e-05]
+  prop_diameter_m: 0.178        # 7인치 (가드 바깥지름 207.8 mm)
+  blades: 3                     # 3엽 프롭 (사용자 2026-10-12). 비주얼만 3엽, 관성은 x500 로터 값 유지
+motor:                          # x500 (PX4 v1.17.0) 값
+  motor_constant: 8.54858e-06
+  moment_constant: 0.016
+  time_constant_up: 0.0125
+  time_constant_down: 0.025
+  rotor_drag_coefficient: 8.06428e-05
+  rolling_moment_coefficient: 1.0e-06
+  thrust_to_weight: 5.0         # 최대 추력 / 무게 (추정: 09-21 로그 저출력 구간 + 7인치 6S 일반값. 모터·프롭 사양 나오면 교체)
+  hover_actuator: 0.35          # 실비행 PX4 hover_thrust_estimate 0.347~0.354 (09-21 로그) -> SIM_GZ_EC_MIN 을 여기서 유도
+  px4_km: 0.05                  # PX4 CA_ROTORn_KM 크기 (x500 과 같음)
+# 센서 위치 출처: 로버_가제보/drone_gazebo.SLDASM (2026-10-09 측정, 하부 프레임 6S5200 + 파트1 + 60° 케이스)
+#   배터리 케이스: 앞면 x +0.0814, 폭 y ±0.026, 밑면 z -0.0919. 가운데 클립 블록 ±0.0175, 밑면 z -0.1088.
+#   H-Flow 자리 (30 x 30 mm) 중심 x -0.0558, 받침 밑면 z -0.0938.
+sensors:
+  # 카메라 = See3CAM_24CUG 2대, 실기 출력 1280x720 rgb8 30 Hz. 화각은 실측 초점거리로 유도 (2 atan(width/2/f)).
+  # 실측 K/D: AVISDrone avis_bringup/config/cam_*_info.yaml (2026-08-28, 720p). 왜곡(D)·주점 오프셋은 가제보 ogre2 가
+  # 렌더링하지 못해 넣지 않는다 -> 시뮬 영상은 왜곡 없는 핀홀, camera_info 의 D = 0.
+  front_camera:                 # 60° 케이스 = 수평에서 아래로 60° (사용자 2026-10-12). T자 클립을 배터리 케이스 앞면에 끼움
+    xyz_m: [0.109589, 0.0, -0.073605]   # 렌즈 (케이스 렌즈판 중심 + 광축 10 mm), 광축 수평 아래 60°
+    rpy_rad: [0.0, 1.047198, 0.0]
+    width: 1280
+    height: 720
+    focal_px: 727.0             # 실측 (f 잠정, ChArUco 재측정 권장) -> 화각 82.7°
+    rate_hz: 30
+    gz_topic: /drone/front_camera/image
+    frame_id: front_camera_optical
+    case_mesh: front_cam_case_60.stl
+    # 케이스 STL: 클립 = STL -z, 렌즈판 법선 (-0.866, 0, 0.5) = 클립 반대 방향에서 60°. 회전: STL z -> 앞(+x),
+    # STL x -> 위(+z). 몸통 밑면(STL z 13.5 mm)을 배터리 케이스 앞면 x 0.0814 에, 높이 중심 z -0.0578 (사용자 확인 2026-10-12)
+    case_xyz_m: [0.0679, 0.076092, -0.107068]
+    case_rpy_rad: [0.0, -1.570796327, 3.141592654]
+  down_camera:                  # 가운데 클립 블록 밑 (사용자: 하방 카메라 따로 있음)
+    xyz_m: [0.0, 0.0, -0.120]
+    rpy_rad: [0.0, 1.570796, 0.0]
+    width: 1280
+    height: 720
+    focal_px: 594.01            # 실측 -> 화각 94.3°
+    rate_hz: 30
+    gz_topic: /drone/down_camera/image
+    frame_id: down_camera_optical
+  flow:                         # H-Flow 광류 (PX4 가제보 광류 플러그인), 받침 밑 모듈 두께 약 11 mm
+    xyz_m: [-0.0558, 0.0, -0.105]
+  lidar:                        # H-Flow ToF 거리 (같은 모듈 안)
+    xyz_m: [-0.0558, 0.008, -0.105]
+    min_m: 0.08                 # 실기 UAVCAN_RNG_MIN / MAX
+    max_m: 30.0
+    rate_hz: 50
+
+# 실기체 PX4 파라미터: 09-21 비행 로그 03_22_21.ulg (PX4Swarm 4021, Pixhawk 6X) 의 기본값과 다른 값 중 시뮬에 의미 있는 것.
+# 기체 설정 파일(4901_gz_spacek_drone)에 그대로 들어간다. 넣지 않은 것: RC·PWM·UAVCAN·Zenoh·보드 장착 보정(실물 전용),
+# SENS_FLOW_SCALE 1.67 (H-Flow 실측 보정 - 시뮬 광류에 곱하면 틀어짐), EKF2_MULTI_IMU 3 (시뮬 IMU 1개),
+# EKF2_EV_* (외부 비전 입력 없음), IMU_GYRO_RATEMAX 800 (시뮬 IMU 250 Hz).
+px4_params:
+  # GPS 없는 운용: H-Flow 광류 + 거리센서, 높이 기준 = 거리센서
+  SYS_HAS_GPS: 0
+  EKF2_GPS_CTRL: 0
+  EKF2_HGT_REF: 2
+  EKF2_OF_CTRL: 1
+  EKF2_RNG_CTRL: 2
+  EKF2_MIN_RNG: 0.06            # 착지 시 거리센서 지면고 (CAD 0.059 m 와 일치)
+  EKF2_RNG_A_HMAX: 10
+  EKF2_RNG_QLTY_T: 0.2
+  EKF2_RNG_FOG: 1
+  EKF2_OF_N_MIN: 0.5
+  EKF2_OF_N_MAX: 1.2
+  EKF2_OF_QMIN: 10
+  EKF2_NOAID_NOISE: 3
+  SENS_FLOW_MAXR: 7.4
+  SENS_FLOW_MAXHGT: 30
+  SENS_FLOW_MINHGT: 0.08
+  # 자세 제어 (실기 튜닝값)
+  IMU_GYRO_CUTOFF: 30
+  MC_ROLLRATE_P: 0.14
+  MC_ROLLRATE_I: 0.3
+  MC_ROLLRATE_D: 0.004
+  MC_PITCHRATE_P: 0.14
+  MC_PITCHRATE_I: 0.3
+  MC_PITCHRATE_D: 0.004
+  # 운용 한계 (실기 설정 - 임무에 맞게 바꿔도 됨)
+  MPC_XY_VEL_MAX: 1.0
+  MPC_XY_CRUISE: 0.5
+  MPC_VEL_MANUAL: 1.0
+  NAV_ACC_RAD: 2.0

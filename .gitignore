@@ -1,0 +1,23 @@
+# colcon 산출물
+build/
+install/
+log/
+
+# 파이썬
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# 외부 저장소 (setup_px4.sh 가 내려받음)
+src/px4_msgs/
+
+# 공유용 압축 (git 이전 배포 방식)
+*.tar.gz
+
+# superpowers 작업 기록 (설계·계획 초안과 진행 원장 - 결정 사항은 README/설정 주석으로 옮긴다)
+.superpowers/
+docs/superpowers/
+
+# 편집기
+.vscode/
+*.swp

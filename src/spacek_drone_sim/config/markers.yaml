@@ -1,0 +1,17 @@
+# 플랫폼 마커 (3a단계). 마커가 아직 미정이라 기본값 AprilTag 36h11 ("아무거나 넣어도 될 듯", 2026-10-09).
+# family: tag36h11 | tag25h9 | tag16h5 | aruco_4x4_50 | aruco_5x5_100 | aruco_6x6_250
+# size_m = 검은 테두리 한 변. 그 바깥에 흰 여백 1칸이 붙는다 (36h11: 여백 포함 = size_m x 10/8).
+# anchor = 붙일 링크의 상자 충돌 이름. surface_offset_m = 충돌 상자 윗면 -> 보이는 면(메시) 높이.
+#   접이판 메시(출력 15 mm)는 충돌 상자(6 mm) 윗면보다 최대 5.7 mm 높아 그 위에 붙인다
+#   (test_markers_sit_above_visible_mesh 가 검사).
+# flip_v: 리눅스에서 marker_probe 가 마커를 못 읽으면 true (텍스처 상하 반전) 로 바꿔 볼 것.
+family: tag36h11
+pixels_per_cell: 40
+lift_m: 0.0005
+flip_v: false
+markers:
+  - {id: 0, link: floor, anchor: floor_col, size_m: 0.160, surface_offset_m: 0.0}
+  - {id: 1, link: plate_px, anchor: plate_px_col, size_m: 0.080, surface_offset_m: 0.0057}
+  - {id: 2, link: plate_mx, anchor: plate_mx_col, size_m: 0.080, surface_offset_m: 0.0057}
+  - {id: 3, link: plate_py, anchor: plate_py_col, size_m: 0.080, surface_offset_m: 0.0057}
+  - {id: 4, link: plate_my, anchor: plate_my_col, size_m: 0.080, surface_offset_m: 0.0057}

@@ -1,0 +1,94 @@
+# landing_controller 노드 파라미터
+# 게인은 "가속도 단위" (kp [1/s^2], kd [1/s]) 이고 질량/관성을 곱해 힘/토크로 바꾼다.
+# scenario/target_*/spawn_*/drone_mass/mode/csv_dir/shutdown_on_done 은 launch 가 덮어쓴다.
+landing_controller:
+  ros__parameters:
+    mode: closed_loop               # closed_loop | sw_openloop (SolidWorks 추력 스케줄 재현)
+    scenario: center
+    target_x: 0.0                   # [m] 하강 목표 위치 (플랫폼 좌표계)
+    target_y: 0.0
+    target_yaw_deg: 0.0
+    spawn_x: 0.0                    # [m] 스폰 위치 (드론 원점) - 조인트 위치에 더해 월드 좌표를 만든다
+    spawn_y: 0.0
+    spawn_z: 0.8084
+
+    # ---- 드론 물성 ----
+    drone_mass: 1.9                 # [kg]
+    chain_mass: 0.015               # 드론과 함께 상하로 움직이는 더미 링크 질량 (carriage_z + gimbal 2개)
+    inertia_xx: 0.01203
+    inertia_yy: 0.01203
+    inertia_zz: 0.01956
+    gravity: 9.80665
+
+    # ---- 토픽/조인트 ----
+    drone_joint_state_topic: /drone/joint_states
+    platform_joint_state_topic: /joint_states
+    force_topic_prefix: /model/simple_drone/joint/
+    floor_joint: floor_joint
+    plate_joints: [plate_px_joint, plate_mx_joint, plate_py_joint, plate_my_joint]
+    plate_zero_angle_deg: 10.367
+
+    # ---- 기하 (플랫폼 좌표계, m) ----
+    frame_top_z: 0.144
+    floor_top_standby_z: 0.1211
+    gear_bottom_to_origin: 0.1644
+    floor_hard_stop: 0.0606
+
+    # ---- 제어 ----
+    control_rate_hz: 200.0
+    max_force_xy: 20.0              # [N]
+    max_force_z: 60.0               # [N]
+    max_torque: 2.0                 # [N m]
+    kp_xy: 16.0
+    kd_xy: 8.0
+    kp_z: 25.0
+    kd_z: 10.0
+    ki_z: 2.0
+    i_max_z: 2.0                    # [N] 적분항 한계
+    kp_yaw: 25.0
+    kd_yaw: 10.0
+    kp_att: 100.0                   # roll/pitch 수평 유지
+    kd_att: 20.0
+
+    # ---- closed_loop 시퀀스 ----
+    approach_height: 0.5            # [m] 착륙기어 바닥 - 프레임 윗면 (정렬 고도)
+    align_min_time: 2.0             # [s] 공중 정렬 최소 시간
+    align_timeout: 15.0
+    align_pos_tol: 0.002            # [m]
+    align_yaw_tol_deg: 1.0
+    descent_speed: 0.3              # [m/s]
+    touchdown_gap_tol: 0.012        # [m] 기어 바닥 - 바닥 윗면
+    touchdown_vz_tol: 0.08          # [m/s] 드론-바닥 상대 수직속도
+    touchdown_confirm_time: 0.15    # [s]
+    thrust_cut_ramp_time: 0.05      # [s] 모터 OFF 램프 (0 = 즉시)
+    settle_vel_tol: 0.005           # [m/s] 바닥 속도
+    settle_time: 0.3
+    settle_timeout: 3.0
+    captured_hold_time: 3.0         # [s] 포획 유지 후 결과 기록
+    takeoff_thrust_ratio: 1.5       # x 무게
+    takeoff_clear_height: 0.1       # [m] 이 높이(기어 바닥-프레임 윗면)까지 수평/요 제어 OFF
+    takeoff_timeout: 5.0
+    takeoff_attitude_hold: true     # 이륙 중 roll/pitch 수평 유지
+    climb_height: 0.6               # [m] 기어 바닥 - 프레임 윗면
+    climb_speed: 0.5                # [m/s]
+    done_tol: 0.02
+    done_hold_time: 1.5
+
+    # ---- sw_openloop (SolidWorks Motion 추력 스케줄, t = 첫 상태 수신 시각 기준) ----
+    ol_descent_ratio: 0.85          # 0 ~ 0.30 s : 0.85 W
+    ol_descent_hold_until: 0.30
+    ol_cut_end: 0.45                # 0.30 ~ 0.45 s : 0 으로 램프 (모터 OFF)
+    ol_takeoff_start: 2.0           # 2.0 ~ 2.2 s : 이륙 추력 램프
+    ol_takeoff_full: 2.2
+    ol_takeoff_ratio: 1.10          # SolidWorks 결과 보고값 1.10 W (초기 안내값 1.25 W)
+    ol_capture_log_time: 1.95       # 이륙 직전 포획 결과 기록
+    ol_attitude_hold: false         # SolidWorks 와 같이 자세 제어 없음
+
+    # ---- 판정/기록 ----
+    pos_tol: 0.02                   # [m] 포획 후 |x|,|y| 허용치
+    yaw_tol_deg: 12.0               # 90 deg 배수 기준 yaw 오차 허용치
+    max_sim_time: 60.0
+    csv_dir: ''                     # '' = CSV 기록 안 함 (launch 기본값 ~/landing_results)
+    log_rate_hz: 50.0
+    shutdown_on_done: false
+    done_linger_time: 1.0

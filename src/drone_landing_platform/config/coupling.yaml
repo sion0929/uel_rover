@@ -1,0 +1,29 @@
+# plate_coupler 노드 파라미터: 바닥 침하량 d -> 플레이트 각도 theta
+# 숫자는 반드시 소수점 표기(예: 10.0)로 쓰는 것을 권장 (정수도 읽히도록 처리했음)
+plate_coupler:
+  ros__parameters:
+    joint_state_topic: /joint_states
+    floor_joint: floor_joint
+    plate_joints: [plate_px_joint, plate_mx_joint, plate_py_joint, plate_my_joint]
+    cmd_topic_prefix: /platform/      # -> /platform/<joint>/cmd_pos (bridge 가 gz 토픽으로 연결)
+    publish_rate_hz: 200.0
+
+    # 'law'  : sin(theta) = (h0 + d) / L
+    # 'table': 아래 table.d_mm / table.theta_deg 선형 보간 (양 끝 클램프)
+    mode: law
+    law:
+      length_mm: 107.25               # 힌지-핀 거리 L
+      h0_mm: 19.3                     # 대기 시 핀 높이 - 힌지 높이 (135.0 - 115.7)
+      max_sink_mm: 84.0               # 법칙 입력 클램프 (실제 스톱은 60.6 mm)
+
+    # SolidWorks 측정값으로 교체할 테이블 (현재는 위 법칙을 샘플링한 값)
+    # theta 는 절대각(수평 기준) [deg]
+    table:
+      d_mm:      [0.0,   10.0,  20.0,  30.0,  40.0,  50.0,  60.0,  60.6,  70.0,  80.0,  84.0]
+      theta_deg: [10.37, 15.85, 21.50, 27.37, 33.57, 40.25, 47.68, 48.16, 56.37, 67.80, 74.40]
+
+    # SDF 에서 플레이트 조인트 0 rad 에 해당하는 절대각 = 대기각 asin(19.3/107.25)
+    # 조인트 명령 = theta - plate_zero_angle_deg
+    plate_zero_angle_deg: 10.367
+    theta_min_deg: 0.0
+    theta_max_deg: 95.0

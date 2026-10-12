@@ -1,0 +1,152 @@
+<?xml version="1.0"?>
+<!--
+  단순 드론 (Gazebo Harmonic / SDF 1.9)
+
+  드론 좌표계 = body 링크 좌표계: 원점 = 기체 중심, Z 위, 착륙기어 바닥 z = -0.1644 m.
+  하부 착륙 프레임 184(X) x 183(Y) x 160 mm, z -0.1644 .. -0.0044.
+  모터(추력점) 4개: (+-0.1329, +-0.1329, +0.0044).
+  질량 1.9 kg = 기체 1.674 + 착륙 프레임 proxy 0.226 (launch 의 drone_mass 로 변경 가능, 관성 비례 스케일).
+
+  비행 구동 방식:
+    월드 =(fixed)= anchor -> [drone_x 직동 X] -> [drone_y 직동 Y] -> [drone_z 직동 Z] -> [drone_yaw 회전 Z]
+         -> [drone_pitch 회전 Y] -> [drone_roll 회전 X] -> body
+    6개 조인트 모두 마찰/감쇠/스프링 0, 중간 링크는 5 g 의 더미. 따라서 조인트 힘이 0 이면
+    body 는 자유 강체와 동등하게 움직인다(플레이트에 밀려 x, y, yaw 이동 가능).
+    각 조인트에 ApplyJointForce 시스템이 붙어 있어 마지막 명령값을 매 스텝 계속 가한다.
+    (ApplyLinkWrench 의 persistent 토픽은 렌치가 누적되고 clear 와 경합하므로 연속 제어에 부적합)
+  주의: 스폰 시 yaw 는 항상 0 으로 스폰하고(직동축이 월드축과 정렬되어야 함),
+        시나리오 yaw 는 제어기가 공중 정렬 단계에서 맞춘다.
+-->
+<sdf version="1.9">
+  <model name="simple_drone">
+    <static>false</static>
+    <self_collide>false</self_collide>
+
+    <!-- 스폰 위치에 고정되는 앵커 (world 와 fixed joint: Gazebo 에서 가장 확실히 지원되는 형태) -->
+    <link name="anchor">
+      <inertial><mass>0.01</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>1e-6</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+    </link>
+    <link name="carriage_x">
+      <inertial><mass>0.005</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>1e-6</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+    </link>
+    <link name="carriage_y">
+      <inertial><mass>0.005</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>1e-6</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+    </link>
+    <link name="carriage_z">
+      <inertial><mass>0.005</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>1e-6</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+    </link>
+    <link name="gimbal_yaw">
+      <inertial><mass>0.005</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>1e-6</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+    </link>
+    <link name="gimbal_pitch">
+      <inertial><mass>0.005</mass><inertia><ixx>1e-6</ixx><iyy>1e-6</iyy><izz>1e-6</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia></inertial>
+    </link>
+
+    <link name="body">
+      <!-- 박스 근사 관성: 허브 1.274 kg(140x140x54) + 모터 4x0.1 kg + 착륙 프레임 0.226 kg(184x183x160) -->
+      <inertial>
+        <pose>0 0 -0.00911 0 0 0</pose>
+        <mass>1.9</mass>
+        <inertia><ixx>0.01203</ixx><iyy>0.01203</iyy><izz>0.01956</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <!-- 충돌: 하부 착륙 프레임 박스만 사용 -->
+      <collision name="landing_frame_col">
+        <pose>0 0 -0.0844 0 0 0</pose>
+        <geometry><box><size>0.184 0.183 0.160</size></box></geometry>
+        <surface><friction><ode><mu>0.3</mu><mu2>0.3</mu2></ode></friction></surface>
+      </collision>
+
+      <visual name="landing_frame_box_visual">
+        <pose>0 0 -0.0844 0 0 0</pose>
+        <geometry><box><size>0.184 0.183 0.160</size></box></geometry>
+        <material><ambient>0.1 0.1 0.1 0.6</ambient><diffuse>0.15 0.15 0.18 0.6</diffuse></material>
+        <transparency>0.4</transparency>
+      </visual>
+      <visual name="hub_box_visual">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry><box><size>0.14 0.14 0.054</size></box></geometry>
+        <material><ambient>0.1 0.1 0.3 1</ambient><diffuse>0.2 0.2 0.7 1</diffuse></material>
+      </visual>
+      <visual name="arm_a_box_visual">
+        <pose>0 0 0.0044 0 0 0.785398</pose>
+        <geometry><box><size>0.376 0.02 0.015</size></box></geometry>
+        <material><ambient>0.1 0.1 0.1 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+      </visual>
+      <visual name="arm_b_box_visual">
+        <pose>0 0 0.0044 0 0 -0.785398</pose>
+        <geometry><box><size>0.376 0.02 0.015</size></box></geometry>
+        <material><ambient>0.1 0.1 0.1 1</ambient><diffuse>0.2 0.2 0.2 1</diffuse></material>
+      </visual>
+      <visual name="motor_pp_box_visual"><pose>0.1329 0.1329 0.0194 0 0 0</pose><geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry><material><ambient>0.3 0.05 0.05 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material></visual>
+      <visual name="motor_mp_box_visual"><pose>-0.1329 0.1329 0.0194 0 0 0</pose><geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry><material><ambient>0.3 0.05 0.05 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material></visual>
+      <visual name="motor_mm_box_visual"><pose>-0.1329 -0.1329 0.0194 0 0 0</pose><geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry><material><ambient>0.3 0.05 0.05 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material></visual>
+      <visual name="motor_pm_box_visual"><pose>0.1329 -0.1329 0.0194 0 0 0</pose><geometry><cylinder><radius>0.014</radius><length>0.02</length></cylinder></geometry><material><ambient>0.3 0.05 0.05 1</ambient><diffuse>0.8 0.1 0.1 1</diffuse></material></visual>
+      <visual name="drone_mesh_visual">
+        <geometry><mesh><uri>model://simple_drone/meshes/drone.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.1 0.1 0.15 1</ambient><diffuse>0.25 0.25 0.35 1</diffuse></material>
+      </visual>
+    </link>
+
+    <!-- 가상 6자유도 체인 (축은 child 링크 좌표계 = 대기 시 모델 좌표계 기준) -->
+    <joint name="anchor_fixed" type="fixed">
+      <parent>world</parent>
+      <child>anchor</child>
+    </joint>
+    <joint name="drone_x" type="prismatic">
+      <parent>anchor</parent>
+      <child>carriage_x</child>
+      <axis><xyz>1 0 0</xyz><limit><lower>-1e16</lower><upper>1e16</upper><effort>1000</effort><velocity>100</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics></axis>
+    </joint>
+    <joint name="drone_y" type="prismatic">
+      <parent>carriage_x</parent>
+      <child>carriage_y</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1e16</lower><upper>1e16</upper><effort>1000</effort><velocity>100</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics></axis>
+    </joint>
+    <joint name="drone_z" type="prismatic">
+      <parent>carriage_y</parent>
+      <child>carriage_z</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper><effort>1000</effort><velocity>100</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics></axis>
+    </joint>
+    <joint name="drone_yaw" type="revolute">
+      <parent>carriage_z</parent>
+      <child>gimbal_yaw</child>
+      <axis><xyz>0 0 1</xyz><limit><lower>-1e16</lower><upper>1e16</upper><effort>1000</effort><velocity>100</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics></axis>
+    </joint>
+    <joint name="drone_pitch" type="revolute">
+      <parent>gimbal_yaw</parent>
+      <child>gimbal_pitch</child>
+      <axis><xyz>0 1 0</xyz><limit><lower>-1e16</lower><upper>1e16</upper><effort>1000</effort><velocity>100</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics></axis>
+    </joint>
+    <joint name="drone_roll" type="revolute">
+      <parent>gimbal_pitch</parent>
+      <child>body</child>
+      <axis><xyz>1 0 0</xyz><limit><lower>-1e16</lower><upper>1e16</upper><effort>1000</effort><velocity>100</velocity></limit>
+        <dynamics><damping>0</damping><friction>0</friction></dynamics></axis>
+    </joint>
+
+    <!-- 상태 -> /world/landing_test/model/simple_drone/joint_state
+         update_rate 는 landing_controller control_rate_hz (200 Hz) 와 같거나 정수배여야 한다 (250 Hz -> 실제 125 Hz) -->
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+      <joint_name>drone_x</joint_name>
+      <joint_name>drone_y</joint_name>
+      <joint_name>drone_z</joint_name>
+      <joint_name>drone_yaw</joint_name>
+      <joint_name>drone_pitch</joint_name>
+      <joint_name>drone_roll</joint_name>
+      <update_rate>200</update_rate>
+    </plugin>
+
+    <!-- 힘/토크 입력: /model/simple_drone/joint/<joint>/cmd_force (gz.msgs.Double, 마지막 값 유지) -->
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce"><joint_name>drone_x</joint_name></plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce"><joint_name>drone_y</joint_name></plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce"><joint_name>drone_z</joint_name></plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce"><joint_name>drone_yaw</joint_name></plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce"><joint_name>drone_pitch</joint_name></plugin>
+    <plugin filename="gz-sim-apply-joint-force-system" name="gz::sim::systems::ApplyJointForce"><joint_name>drone_roll</joint_name></plugin>
+  </model>
+</sdf>

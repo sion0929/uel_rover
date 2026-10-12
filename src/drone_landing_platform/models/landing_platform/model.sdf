@@ -1,0 +1,325 @@
+<?xml version="1.0"?>
+<!--
+  드론 착륙 포획 플랫폼 (Gazebo Harmonic / SDF 1.9)
+
+  좌표계: 플랫폼 좌표계 = 모델 좌표계. Z 위쪽, 원점 = 베이스 플레이트 윗면 중심. 단위 m.
+  모든 링크 좌표계는 "대기 자세의 플랫폼 원점" 에 있다 (링크 pose = 0).
+    -> 플랫폼 좌표계로 내보낸 STL 을 pose 0 으로 그대로 붙이면 된다.
+  조인트 pose 는 child 링크 좌표계 기준 (SDF 1.7+ 기본) = 힌지/축 위치.
+
+  조인트 위치의 의미:
+    floor_joint   : 축 (0,0,-1) -> q = 바닥 침하량 d [m], 0 = 대기, 0.0606 = 하단 스톱
+    plate_*_joint : q = theta - theta0 [rad] (대기 자세 = 0), theta0 = asin(19.3/107.25) = 10.367 deg
+                    한계 -10.367 .. +84.633 deg  (= 절대각 0 .. 95 deg)
+  아래 수치 중 서스펜션/PID 값은 launch 시 config/platform.yaml 값으로 덮어써진다.
+-->
+<sdf version="1.9">
+  <model name="landing_platform">
+    <static>false</static>
+    <self_collide>false</self_collide>
+
+    <!-- ================= 고정 프레임 (월드에 fixed joint 로 고정) ================= -->
+    <link name="frame">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <!-- 출력 부피 추정 (config/platform.yaml frame 과 같음, launch 가 덮어씀) -->
+        <pose>0 0 0.0446 0 0 0</pose>
+        <mass>1.15</mass>
+        <inertia><ixx>0.0188</ixx><iyy>0.0188</iyy><izz>0.0323</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+
+      <!-- 베이스 플레이트 280x280x5, z -5..0 -->
+      <collision name="base_col">
+        <pose>0 0 -0.0025 0 0 0</pose>
+        <geometry><box><size>0.28 0.28 0.005</size></box></geometry>
+      </collision>
+      <visual name="base_box_visual">
+        <pose>0 0 -0.0025 0 0 0</pose>
+        <geometry><box><size>0.28 0.28 0.005</size></box></geometry>
+        <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.4 0.4 0.42 1</diffuse></material>
+      </visual>
+
+      <!-- 코너 블록 33.5x33.5x25, |x|,|y| 106.5..140, z 0..25 -->
+      <collision name="block_pp_col"><pose>0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry></collision>
+      <collision name="block_mp_col"><pose>-0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry></collision>
+      <collision name="block_mm_col"><pose>-0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry></collision>
+      <collision name="block_pm_col"><pose>0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry></collision>
+      <visual name="block_pp_box_visual"><pose>0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
+      <visual name="block_mp_box_visual"><pose>-0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
+      <visual name="block_mm_box_visual"><pose>-0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
+      <visual name="block_pm_box_visual"><pose>0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
+
+      <!-- 코너 타워 벽 8개 (두께 5, 높이 144): X방향 벽 x 118..230 @ |y| 101.5..106.5, Y방향 벽은 대칭 -->
+      <collision name="wall_x_pp_col"><pose>0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry></collision>
+      <collision name="wall_y_pp_col"><pose>0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry></collision>
+      <collision name="wall_x_mp_col"><pose>-0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry></collision>
+      <collision name="wall_y_mp_col"><pose>-0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry></collision>
+      <collision name="wall_x_mm_col"><pose>-0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry></collision>
+      <collision name="wall_y_mm_col"><pose>-0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry></collision>
+      <collision name="wall_x_pm_col"><pose>0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry></collision>
+      <collision name="wall_y_pm_col"><pose>0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry></collision>
+      <visual name="wall_x_pp_box_visual"><pose>0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_y_pp_box_visual"><pose>0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_x_mp_box_visual"><pose>-0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_y_mp_box_visual"><pose>-0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_x_mm_box_visual"><pose>-0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_y_mm_box_visual"><pose>-0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_x_pm_box_visual"><pose>0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_y_pm_box_visual"><pose>0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+
+      <!-- 코너 데크 106.2x106.2x23, |x|,|y| 101.8..208, z 121..144 (윗면 = 프레임 윗면 144) -->
+      <collision name="deck_pp_col"><pose>0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
+      <collision name="deck_mp_col"><pose>-0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
+      <collision name="deck_mm_col"><pose>-0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
+      <collision name="deck_pm_col"><pose>0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
+      <visual name="deck_pp_box_visual"><pose>0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
+      <visual name="deck_mp_box_visual"><pose>-0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
+      <visual name="deck_mm_box_visual"><pose>-0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
+      <visual name="deck_pm_box_visual"><pose>0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
+
+      <!-- 핀 가이드(z = 135)는 충돌 없음: 핀 높이 구속은 JointPositionController 커플링으로 대체 -->
+      <visual name="frame_mesh_visual">
+        <geometry><mesh><uri>model://landing_platform/meshes/frame.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.55 0.55 0.58 1</diffuse></material>
+      </visual>
+    </link>
+
+    <joint name="frame_fixed" type="fixed">
+      <parent>world</parent>
+      <child>frame</child>
+    </joint>
+
+    <!-- ================= 가동 바닥 200x200x15, 대기 시 z 106.1..121.1 ================= -->
+    <link name="floor">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0.1136 0 0 0</pose>
+        <mass>0.486</mass>
+        <inertia><ixx>0.001629</ixx><iyy>0.001629</iyy><izz>0.00324</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="floor_col">
+        <pose>0 0 0.1136 0 0 0</pose>
+        <geometry><box><size>0.2 0.2 0.015</size></box></geometry>
+        <surface><friction><ode><mu>0.5</mu><mu2>0.5</mu2></ode></friction></surface>
+      </collision>
+      <visual name="floor_box_visual">
+        <pose>0 0 0.1136 0 0 0</pose>
+        <geometry><box><size>0.2 0.2 0.015</size></box></geometry>
+        <material><ambient>0.15 0.35 0.15 1</ambient><diffuse>0.2 0.6 0.25 1</diffuse></material>
+      </visual>
+      <visual name="floor_mesh_visual">
+        <geometry><mesh><uri>model://landing_platform/meshes/floor.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.15 0.35 0.15 1</ambient><diffuse>0.2 0.6 0.25 1</diffuse></material>
+      </visual>
+    </link>
+
+    <!--
+      서스펜션 (쇼바 2개를 수직 등가 스프링 1개로): k = 250 N/m, 예압 8.1 N, c = 40 N s/m.
+      스프링 힘(축 방향) = -k (q - spring_reference). 축이 -Z 이므로 q = d.
+      d = 0 에서 위로 F 를 내려면 spring_reference = -F / k.
+      Gazebo 에서는 플레이트 무게가 전부 바닥에 걸리므로(실기의 핀 가이드가 없음) 가이드가 받치는
+      몫 4 x (0.176 g - 0.90) = 3.30 N 을 예압에 더한다:  q_ref = -(8.1 + 3.30) / 250 = -0.0456 m.
+      하단 스톱 = 60.6 mm (쇼바 경사 스톱). 기구 최대(84 mm)는 사용하지 않음.
+    -->
+    <joint name="floor_joint" type="prismatic">
+      <parent>frame</parent>
+      <child>floor</child>
+      <pose>0 0 0.1136 0 0 0</pose>
+      <axis>
+        <xyz>0 0 -1</xyz>
+        <limit>
+          <lower>0.0</lower>
+          <upper>0.0606</upper>
+        </limit>
+        <dynamics>
+          <damping>40.0</damping>
+          <friction>0.0</friction>
+          <spring_reference>-0.0456</spring_reference>
+          <spring_stiffness>250.0</spring_stiffness>
+        </dynamics>
+      </axis>
+    </joint>
+
+    <!-- ================= 접이식 플레이트 4개 (113.25 x 200 x 6, 0.176 kg) =================
+         plate_px: 힌지 (107.2, 0, 115.7), 핀 (212.7, 0, 135.0), L = 107.25, 대기각 10.367 deg.
+         판 중심 = 힌지 + (L/2) u, u = (0.983683, 0, 0.179953) -> (159.95, 0, 125.35) mm -->
+    <link name="plate_px">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0.15995 0 0.12535 0 -0.180938 0</pose>
+        <mass>0.176</mass>
+        <inertia><ixx>0.00058719</ixx><iyy>0.00018864</iyy><izz>0.00077478</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="plate_px_col">
+        <pose>0.15995 0 0.12535 0 -0.180938 0</pose>
+        <geometry><box><size>0.11325 0.2 0.006</size></box></geometry>
+        <surface><friction><ode><mu>0.2</mu><mu2>0.2</mu2></ode></friction></surface>
+      </collision>
+      <visual name="plate_px_box_visual">
+        <pose>0.15995 0 0.12535 0 -0.180938 0</pose>
+        <geometry><box><size>0.11325 0.2 0.006</size></box></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+      <visual name="plate_px_mesh_visual">
+        <geometry><mesh><uri>model://landing_platform/meshes/plate_px.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="plate_px_joint" type="revolute">
+      <parent>floor</parent>
+      <child>plate_px</child>
+      <pose>0.1072 0 0.1157 0 0 0</pose>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <limit><lower>-0.180938</lower><upper>1.47712</upper><effort>10</effort></limit>
+        <dynamics><damping>0.002</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+
+    <link name="plate_mx">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>-0.15995 0 0.12535 0 0.180938 0</pose>
+        <mass>0.176</mass>
+        <inertia><ixx>0.00058719</ixx><iyy>0.00018864</iyy><izz>0.00077478</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="plate_mx_col">
+        <pose>-0.15995 0 0.12535 0 0.180938 0</pose>
+        <geometry><box><size>0.11325 0.2 0.006</size></box></geometry>
+        <surface><friction><ode><mu>0.2</mu><mu2>0.2</mu2></ode></friction></surface>
+      </collision>
+      <visual name="plate_mx_box_visual">
+        <pose>-0.15995 0 0.12535 0 0.180938 0</pose>
+        <geometry><box><size>0.11325 0.2 0.006</size></box></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+      <visual name="plate_mx_mesh_visual">
+        <geometry><mesh><uri>model://landing_platform/meshes/plate_mx.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="plate_mx_joint" type="revolute">
+      <parent>floor</parent>
+      <child>plate_mx</child>
+      <pose>-0.1072 0 0.1157 0 0 0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit><lower>-0.180938</lower><upper>1.47712</upper><effort>10</effort></limit>
+        <dynamics><damping>0.002</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+
+    <link name="plate_py">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0.15995 0.12535 0.180938 0 0</pose>
+        <mass>0.176</mass>
+        <inertia><ixx>0.00018864</ixx><iyy>0.00058719</iyy><izz>0.00077478</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="plate_py_col">
+        <pose>0 0.15995 0.12535 0.180938 0 0</pose>
+        <geometry><box><size>0.2 0.11325 0.006</size></box></geometry>
+        <surface><friction><ode><mu>0.2</mu><mu2>0.2</mu2></ode></friction></surface>
+      </collision>
+      <visual name="plate_py_box_visual">
+        <pose>0 0.15995 0.12535 0.180938 0 0</pose>
+        <geometry><box><size>0.2 0.11325 0.006</size></box></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+      <visual name="plate_py_mesh_visual">
+        <geometry><mesh><uri>model://landing_platform/meshes/plate_py.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="plate_py_joint" type="revolute">
+      <parent>floor</parent>
+      <child>plate_py</child>
+      <pose>0 0.1072 0.1157 0 0 0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit><lower>-0.180938</lower><upper>1.47712</upper><effort>10</effort></limit>
+        <dynamics><damping>0.002</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+
+    <link name="plate_my">
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 -0.15995 0.12535 -0.180938 0 0</pose>
+        <mass>0.176</mass>
+        <inertia><ixx>0.00018864</ixx><iyy>0.00058719</iyy><izz>0.00077478</izz><ixy>0</ixy><ixz>0</ixz><iyz>0</iyz></inertia>
+      </inertial>
+      <collision name="plate_my_col">
+        <pose>0 -0.15995 0.12535 -0.180938 0 0</pose>
+        <geometry><box><size>0.2 0.11325 0.006</size></box></geometry>
+        <surface><friction><ode><mu>0.2</mu><mu2>0.2</mu2></ode></friction></surface>
+      </collision>
+      <visual name="plate_my_box_visual">
+        <pose>0 -0.15995 0.12535 -0.180938 0 0</pose>
+        <geometry><box><size>0.2 0.11325 0.006</size></box></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+      <visual name="plate_my_mesh_visual">
+        <geometry><mesh><uri>model://landing_platform/meshes/plate_my.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
+        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+      </visual>
+    </link>
+    <joint name="plate_my_joint" type="revolute">
+      <parent>floor</parent>
+      <child>plate_my</child>
+      <pose>0 -0.1072 0.1157 0 0 0</pose>
+      <axis>
+        <xyz>-1 0 0</xyz>
+        <limit><lower>-0.180938</lower><upper>1.47712</upper><effort>10</effort></limit>
+        <dynamics><damping>0.002</damping><friction>0</friction></dynamics>
+      </axis>
+    </joint>
+
+    <!-- ================= 시스템 플러그인 ================= -->
+    <!-- 조인트 상태 -> /world/landing_test/model/landing_platform/joint_state (gz.msgs.Model)
+         update_rate 는 plate_coupler publish_rate_hz / landing_controller control_rate_hz (200 Hz) 와
+         같거나 정수배여야 한다. (250 Hz 이면 4 ms 간격 메시지를 5 ms 주기로 거르게 되어 실제 주기가 8 ms = 125 Hz 로 떨어짐) -->
+    <plugin filename="gz-sim-joint-state-publisher-system" name="gz::sim::systems::JointStatePublisher">
+      <joint_name>floor_joint</joint_name>
+      <joint_name>plate_px_joint</joint_name>
+      <joint_name>plate_mx_joint</joint_name>
+      <joint_name>plate_py_joint</joint_name>
+      <joint_name>plate_my_joint</joint_name>
+      <update_rate>200</update_rate>
+    </plugin>
+
+    <!-- 플레이트 위치 서보 (명령 = theta - theta0 [rad], plate_coupler 노드가 발행) -->
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>plate_px_joint</joint_name>
+      <topic>/model/landing_platform/joint/plate_px_joint/0/cmd_pos</topic>
+      <p_gain>30.0</p_gain><i_gain>0.0</i_gain><d_gain>0.3</d_gain>
+      <i_max>0.5</i_max><i_min>-0.5</i_min>
+      <cmd_max>3.0</cmd_max><cmd_min>-3.0</cmd_min>
+      <initial_position>0.0</initial_position>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>plate_mx_joint</joint_name>
+      <topic>/model/landing_platform/joint/plate_mx_joint/0/cmd_pos</topic>
+      <p_gain>30.0</p_gain><i_gain>0.0</i_gain><d_gain>0.3</d_gain>
+      <i_max>0.5</i_max><i_min>-0.5</i_min>
+      <cmd_max>3.0</cmd_max><cmd_min>-3.0</cmd_min>
+      <initial_position>0.0</initial_position>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>plate_py_joint</joint_name>
+      <topic>/model/landing_platform/joint/plate_py_joint/0/cmd_pos</topic>
+      <p_gain>30.0</p_gain><i_gain>0.0</i_gain><d_gain>0.3</d_gain>
+      <i_max>0.5</i_max><i_min>-0.5</i_min>
+      <cmd_max>3.0</cmd_max><cmd_min>-3.0</cmd_min>
+      <initial_position>0.0</initial_position>
+    </plugin>
+    <plugin filename="gz-sim-joint-position-controller-system" name="gz::sim::systems::JointPositionController">
+      <joint_name>plate_my_joint</joint_name>
+      <topic>/model/landing_platform/joint/plate_my_joint/0/cmd_pos</topic>
+      <p_gain>30.0</p_gain><i_gain>0.0</i_gain><d_gain>0.3</d_gain>
+      <i_max>0.5</i_max><i_min>-0.5</i_min>
+      <cmd_max>3.0</cmd_max><cmd_min>-3.0</cmd_min>
+      <initial_position>0.0</initial_position>
+    </plugin>
+  </model>
+</sdf>

@@ -1,0 +1,35 @@
+# spacek 로버 Gazebo 파라미터 (단위: m, kg, s, rad, N m)
+# launch 가 이 값으로 rover_params.derive() 를 계산해 모델 SDF 에 넣는다.
+# 좌표: base_link = 바퀴 축 4개의 중심, x 전방, y 왼쪽, z 위.
+
+mass:
+  total_kg: 20.0            # 들어 본 총질량 (실측하면 교체)
+  wheel_kg: 1.0             # 바퀴 1개 (타이어 + 허브). base = total - 4 x wheel
+
+base:
+  com_m: [-0.00028, 0.0, 0.12578]     # base 바디 균일 밀도 무게중심 (SolidWorks, Task 1 확인)
+  com_offset_m: [0.0, 0.0, 0.0]       # 보정 (예: 배터리가 바닥이면 z 를 낮춤)
+  inertia_box_m: [0.415, 0.200, 0.123]  # 관성 근사용 섀시 박스 (x 길이, y 폭, z 높이)
+
+wheel:
+  radius_m: 0.0877          # 실기 유효 반지름: 1.00 m 직진에서 오도메트리 0.997 m (0.3%). CAD 메시는 0.08825
+  width_m: 0.0875844
+  separation_m: 0.3795844   # 좌우 바퀴 중심 간 거리 (트랙)
+  wheelbase_m: 0.470        # 앞뒤 바퀴 축 간 거리
+  # 바퀴-지면 마찰. DART 는 마찰을 두 방향(바퀴 축 fdir1 / 굴림 방향)으로 따로 제한하므로
+  # 제자리 선회 조건: mu_longitudinal x 반트랙 > mu_lateral x 반축간  (0.19 / 0.235 -> mu_lateral < 0.73)
+  # 같은 값(예: 0.9 / 0.9)이면 바퀴만 헛돌고 차체는 돌지 않는다. launch 로그의 turn_margin 이 1 보다 커야 한다.
+  mu_longitudinal: 0.9      # 굴림 방향 (SDF mu2)
+  mu_lateral: 0.5           # 바퀴 축 방향 (SDF mu, fdir1 = 바퀴 축)
+
+motor:
+  model: 미상 (토크는 XM540-W270 12 V 추정치)
+  stall_torque_nm: 10.6
+  max_wheel_rpm: 50.0       # 실기 펌웨어 MAX_RPM (바퀴 기준) -> 5.24 rad/s, 최고 직진 약 0.46 m/s
+  gear_ratio: 1.0           # 바퀴 토크 = 모터 토크 x gear_ratio (속도 상한은 max_wheel_rpm 이 바퀴 기준)
+  wheels_per_motor: 2       # 같은 암의 앞뒤 바퀴가 연결되어 함께 돈다
+
+drive:
+  max_linear_accel_mps2: 0.5
+  max_angular_accel_radps2: 2.0
+  odom_rate_hz: 50.0

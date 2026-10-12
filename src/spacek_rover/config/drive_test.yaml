@@ -1,0 +1,37 @@
+# drive_test 노드 파라미터 (단계: settle -> forward -> spin -> arc -> stop)
+# ride_height_m, linear_accel_mps2, angular_accel_radps2 는 launch 가 rover.yaml 값으로 덮어쓴다.
+drive_test:
+  ros__parameters:
+    cmd_topic: /rover/cmd_vel
+    odom_gt_topic: /rover/odom_gt
+    odom_topic: /rover/odom
+    joint_state_topic: /rover/joint_states
+    cmd_rate_hz: 50.0
+    start_timeout_s: 30.0
+    # 단계별 명령
+    settle_duration_s: 2.0
+    forward_speed_mps: 0.2
+    forward_duration_s: 5.0
+    spin_rate_radps: 0.8
+    spin_duration_s: 4.0
+    arc_speed_mps: 0.15
+    arc_rate_radps: 0.3
+    arc_duration_s: 4.0
+    stop_duration_s: 2.0
+    # 판정 기준 (설계 6.2)
+    ride_height_m: 0.0877
+    settle_z_tol_m: 0.005
+    settle_tilt_tol_deg: 1.0
+    settle_wheel_speed_tol: 0.05
+    forward_distance_tol: 0.10
+    forward_heading_tol_deg: 2.0
+    forward_lateral_tol_m: 0.03
+    spin_drift_tol_m: 0.10
+    stop_speed_tol_mps: 0.01
+    stop_window_s: 0.5
+    linear_accel_mps2: 0.5
+    angular_accel_radps2: 2.0
+    # spin/arc: 명령 yaw(와 arc 전진)의 이 비율 이상 실제로 움직여야 통과 (스키드 미끄럼 감안)
+    min_motion_fraction: 0.3
+    csv_dir: ~/rover_results
+    shutdown_on_done: false

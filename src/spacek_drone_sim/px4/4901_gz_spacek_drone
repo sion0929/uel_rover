@@ -1,0 +1,80 @@
+#!/bin/sh
+#
+# @name Gazebo spacek_drone (대회 기체: Pixhawk 6X, H-Flow, 전방 60도 + 하방 카메라)
+#
+# @type Quadrotor
+#
+# spacek_drone_sim 이 drone.yaml 로 만든 파일 (PX4 v1.17.0). 직접 고치지 말고 drone.yaml 을 고칠 것.
+
+PX4_SIM_MODEL=${PX4_SIM_MODEL:=spacek_drone}
+
+. ${R}etc/init.d-posix/airframes/4001_gz_x500
+
+param set-default CA_ROTOR0_PX 0.1329
+param set-default CA_ROTOR0_PY 0.1329
+param set-default CA_ROTOR0_KM 0.050
+param set-default CA_ROTOR1_PX -0.1329
+param set-default CA_ROTOR1_PY -0.1329
+param set-default CA_ROTOR1_KM 0.050
+param set-default CA_ROTOR2_PX 0.1329
+param set-default CA_ROTOR2_PY -0.1329
+param set-default CA_ROTOR2_KM -0.050
+param set-default CA_ROTOR3_PX -0.1329
+param set-default CA_ROTOR3_PY 0.1329
+param set-default CA_ROTOR3_KM -0.050
+
+param set-default SIM_GZ_EC_MIN1 247
+param set-default SIM_GZ_EC_MAX1 1651
+param set-default SIM_GZ_EC_MIN2 247
+param set-default SIM_GZ_EC_MAX2 1651
+param set-default SIM_GZ_EC_MIN3 247
+param set-default SIM_GZ_EC_MAX3 1651
+param set-default SIM_GZ_EC_MIN4 247
+param set-default SIM_GZ_EC_MAX4 1651
+
+# 실비행 호버 출력 (09-21 로그 hover_thrust_estimate)
+param set-default MPC_THR_HOVER 0.35
+
+# 가제보 센서 (실기체에 GPS 없음)
+param set-default SIM_GZ_EN_GPS 0
+param set-default SIM_GZ_EN_BARO 1
+param set-default SIM_GZ_EN_FLOW 1
+param set-default SIM_GZ_EN_LIDAR 1
+
+# 실기체 파라미터 (drone.yaml px4_params, 09-21 비행 로그)
+param set-default SYS_HAS_GPS 0
+param set-default EKF2_GPS_CTRL 0
+param set-default EKF2_HGT_REF 2
+param set-default EKF2_OF_CTRL 1
+param set-default EKF2_RNG_CTRL 2
+param set-default EKF2_MIN_RNG 0.06
+param set-default EKF2_RNG_A_HMAX 10
+param set-default EKF2_RNG_QLTY_T 0.2
+param set-default EKF2_RNG_FOG 1
+param set-default EKF2_OF_N_MIN 0.5
+param set-default EKF2_OF_N_MAX 1.2
+param set-default EKF2_OF_QMIN 10
+param set-default EKF2_NOAID_NOISE 3
+param set-default SENS_FLOW_MAXR 7.4
+param set-default SENS_FLOW_MAXHGT 30
+param set-default SENS_FLOW_MINHGT 0.08
+param set-default IMU_GYRO_CUTOFF 30
+param set-default MC_ROLLRATE_P 0.14
+param set-default MC_ROLLRATE_I 0.3
+param set-default MC_ROLLRATE_D 0.004
+param set-default MC_PITCHRATE_P 0.14
+param set-default MC_PITCHRATE_I 0.3
+param set-default MC_PITCHRATE_D 0.004
+param set-default MPC_XY_VEL_MAX 1
+param set-default MPC_XY_CRUISE 0.5
+param set-default MPC_VEL_MANUAL 1
+param set-default NAV_ACC_RAD 2
+
+# 시뮬에 조종기 없음: 오프보드가 조종기 상실 페일세이프로 끊기지 않게 (설계 6장)
+param set-default COM_RCL_EXCEPT 4
+param set-default EKF2_OF_POS_X -0.056
+param set-default EKF2_OF_POS_Y 0.000
+param set-default EKF2_OF_POS_Z 0.105
+param set-default EKF2_RNG_POS_X -0.056
+param set-default EKF2_RNG_POS_Y -0.008
+param set-default EKF2_RNG_POS_Z 0.105

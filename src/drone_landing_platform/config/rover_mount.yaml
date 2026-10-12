@@ -1,0 +1,10 @@
+# 로버 위 착륙 플랫폼 장착 (2단계). 좌표: 로버 base_link (x 전방, y 왼쪽, z 위), m / rad.
+# 플랫폼 원점(베이스판 윗면 중심) z = 로버 platform_mount(타공판 윗면) z + base_plate_thickness_m.
+# 월드 rover_landing 의 지면 z 는 -(바퀴 반경 + 플랫폼 원점 z) = -0.30724 (test_world_ground_matches_mount 가 검사).
+mount:
+  x_m: 0.0                  # 0 = 바퀴 축 중심 위 (사용자 결정 2026-10-09)
+  y_m: 0.0
+  yaw_rad: 3.141592654      # 플랫폼 +X = 로버 후방 (SolidWorks 배치와 같음)
+  base_plate_thickness_m: 0.005
+spawn:
+  clearance_m: 0.005        # 바퀴가 지면 위 이만큼 떠서 스폰

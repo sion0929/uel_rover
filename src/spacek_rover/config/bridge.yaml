@@ -1,0 +1,42 @@
+# ros_gz_bridge parameter_bridge 설정 (월드 rover_test, 모델 spacek_rover)
+
+- ros_topic_name: /clock
+  gz_topic_name: /clock
+  ros_type_name: rosgraph_msgs/msg/Clock
+  gz_type_name: gz.msgs.Clock
+  direction: GZ_TO_ROS
+
+# ---- 주행 명령 (DiffDrive: 좌 2 / 우 2 바퀴 속도) ----
+- ros_topic_name: /rover/cmd_vel
+  gz_topic_name: /model/spacek_rover/cmd_vel
+  ros_type_name: geometry_msgs/msg/Twist
+  gz_type_name: gz.msgs.Twist
+  direction: ROS_TO_GZ
+
+# ---- 바퀴 오도메트리 (DiffDrive, 이상적 차동구동 기구학 -> 스키드 선회에서 yaw 과대) ----
+- ros_topic_name: /rover/odom
+  gz_topic_name: /model/spacek_rover/odometry
+  ros_type_name: nav_msgs/msg/Odometry
+  gz_type_name: gz.msgs.Odometry
+  direction: GZ_TO_ROS
+
+# ---- 실제 위치 (OdometryPublisher, 월드 기준 3D) ----
+- ros_topic_name: /rover/odom_gt
+  gz_topic_name: /model/spacek_rover/odometry_gt
+  ros_type_name: nav_msgs/msg/Odometry
+  gz_type_name: gz.msgs.Odometry
+  direction: GZ_TO_ROS
+
+# ---- 바퀴 조인트 상태 ----
+- ros_topic_name: /rover/joint_states
+  gz_topic_name: /world/rover_test/model/spacek_rover/joint_state
+  ros_type_name: sensor_msgs/msg/JointState
+  gz_type_name: gz.msgs.Model
+  direction: GZ_TO_ROS
+
+# ---- tf: odom -> base_link (DiffDrive) ----
+- ros_topic_name: /tf
+  gz_topic_name: /model/spacek_rover/tf
+  ros_type_name: tf2_msgs/msg/TFMessage
+  gz_type_name: gz.msgs.Pose_V
+  direction: GZ_TO_ROS

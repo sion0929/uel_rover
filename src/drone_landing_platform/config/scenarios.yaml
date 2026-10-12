@@ -1,0 +1,18 @@
+# 착륙 시나리오 (launch 인자 scenario:=<이름>)
+# x_mm, y_mm: 하강 시 드론 중심 목표 위치 (플랫폼 좌표계), yaw_deg: 하강 시 기수 각도
+center:
+  x_mm: 0.0
+  y_mm: 0.0
+  yaw_deg: 0.0
+x30:
+  x_mm: 30.0
+  y_mm: 0.0
+  yaw_deg: 0.0
+x60:
+  x_mm: 60.0
+  y_mm: 0.0
+  yaw_deg: 0.0
+yaw30:
+  x_mm: 0.0
+  y_mm: 0.0
+  yaw_deg: 30.0
