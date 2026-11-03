@@ -36,7 +36,7 @@
       <visual name="base_box_visual">
         <pose>0 0 -0.0025 0 0 0</pose>
         <geometry><box><size>0.28 0.28 0.005</size></box></geometry>
-        <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.4 0.4 0.42 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
 
       <!-- 코너 블록 33.5x33.5x25, |x|,|y| 106.5..140, z 0..25 -->
@@ -44,10 +44,10 @@
       <collision name="block_mp_col"><pose>-0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry></collision>
       <collision name="block_mm_col"><pose>-0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry></collision>
       <collision name="block_pm_col"><pose>0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry></collision>
-      <visual name="block_pp_box_visual"><pose>0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
-      <visual name="block_mp_box_visual"><pose>-0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
-      <visual name="block_mm_box_visual"><pose>-0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
-      <visual name="block_pm_box_visual"><pose>0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.45 0.47 1</diffuse></material></visual>
+      <visual name="block_pp_box_visual"><pose>0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="block_mp_box_visual"><pose>-0.12325 0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="block_mm_box_visual"><pose>-0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="block_pm_box_visual"><pose>0.12325 -0.12325 0.0125 0 0 0</pose><geometry><box><size>0.0335 0.0335 0.025</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
 
       <!-- 코너 타워 벽 8개 (두께 5, 높이 144): X방향 벽 x 118..230 @ |y| 101.5..106.5, Y방향 벽은 대칭 -->
       <collision name="wall_x_pp_col"><pose>0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry></collision>
@@ -58,29 +58,29 @@
       <collision name="wall_y_mm_col"><pose>-0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry></collision>
       <collision name="wall_x_pm_col"><pose>0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry></collision>
       <collision name="wall_y_pm_col"><pose>0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry></collision>
-      <visual name="wall_x_pp_box_visual"><pose>0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
-      <visual name="wall_y_pp_box_visual"><pose>0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
-      <visual name="wall_x_mp_box_visual"><pose>-0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
-      <visual name="wall_y_mp_box_visual"><pose>-0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
-      <visual name="wall_x_mm_box_visual"><pose>-0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
-      <visual name="wall_y_mm_box_visual"><pose>-0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
-      <visual name="wall_x_pm_box_visual"><pose>0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
-      <visual name="wall_y_pm_box_visual"><pose>0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.25 0.3 0.4 1</ambient><diffuse>0.35 0.45 0.6 1</diffuse></material></visual>
+      <visual name="wall_x_pp_box_visual"><pose>0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="wall_y_pp_box_visual"><pose>0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="wall_x_mp_box_visual"><pose>-0.174 0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="wall_y_mp_box_visual"><pose>-0.104 0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="wall_x_mm_box_visual"><pose>-0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="wall_y_mm_box_visual"><pose>-0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="wall_x_pm_box_visual"><pose>0.174 -0.104 0.072 0 0 0</pose><geometry><box><size>0.112 0.005 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="wall_y_pm_box_visual"><pose>0.104 -0.174 0.072 0 0 0</pose><geometry><box><size>0.005 0.112 0.144</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
 
       <!-- 코너 데크 106.2x106.2x23, |x|,|y| 101.8..208, z 121..144 (윗면 = 프레임 윗면 144) -->
       <collision name="deck_pp_col"><pose>0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
       <collision name="deck_mp_col"><pose>-0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
       <collision name="deck_mm_col"><pose>-0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
       <collision name="deck_pm_col"><pose>0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry></collision>
-      <visual name="deck_pp_box_visual"><pose>0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
-      <visual name="deck_mp_box_visual"><pose>-0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
-      <visual name="deck_mm_box_visual"><pose>-0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
-      <visual name="deck_pm_box_visual"><pose>0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.5 0.5 0.52 1</diffuse></material></visual>
+      <visual name="deck_pp_box_visual"><pose>0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="deck_mp_box_visual"><pose>-0.1549 0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="deck_mm_box_visual"><pose>-0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
+      <visual name="deck_pm_box_visual"><pose>0.1549 -0.1549 0.1325 0 0 0</pose><geometry><box><size>0.1062 0.1062 0.023</size></box></geometry><material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material></visual>
 
       <!-- 핀 가이드(z = 135)는 충돌 없음: 핀 높이 구속은 JointPositionController 커플링으로 대체 -->
       <visual name="frame_mesh_visual">
         <geometry><mesh><uri>model://landing_platform/meshes/frame.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.55 0.55 0.58 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
     </link>
 
@@ -105,11 +105,11 @@
       <visual name="floor_box_visual">
         <pose>0 0 0.1136 0 0 0</pose>
         <geometry><box><size>0.2 0.2 0.015</size></box></geometry>
-        <material><ambient>0.15 0.35 0.15 1</ambient><diffuse>0.2 0.6 0.25 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
       <visual name="floor_mesh_visual">
         <geometry><mesh><uri>model://landing_platform/meshes/floor.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.15 0.35 0.15 1</ambient><diffuse>0.2 0.6 0.25 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
     </link>
 
@@ -158,11 +158,11 @@
       <visual name="plate_px_box_visual">
         <pose>0.15995 0 0.12535 0 -0.180938 0</pose>
         <geometry><box><size>0.11325 0.2 0.006</size></box></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
       <visual name="plate_px_mesh_visual">
         <geometry><mesh><uri>model://landing_platform/meshes/plate_px.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
     </link>
     <joint name="plate_px_joint" type="revolute">
@@ -191,11 +191,11 @@
       <visual name="plate_mx_box_visual">
         <pose>-0.15995 0 0.12535 0 0.180938 0</pose>
         <geometry><box><size>0.11325 0.2 0.006</size></box></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
       <visual name="plate_mx_mesh_visual">
         <geometry><mesh><uri>model://landing_platform/meshes/plate_mx.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
     </link>
     <joint name="plate_mx_joint" type="revolute">
@@ -224,11 +224,11 @@
       <visual name="plate_py_box_visual">
         <pose>0 0.15995 0.12535 0.180938 0 0</pose>
         <geometry><box><size>0.2 0.11325 0.006</size></box></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
       <visual name="plate_py_mesh_visual">
         <geometry><mesh><uri>model://landing_platform/meshes/plate_py.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
     </link>
     <joint name="plate_py_joint" type="revolute">
@@ -257,11 +257,11 @@
       <visual name="plate_my_box_visual">
         <pose>0 -0.15995 0.12535 -0.180938 0 0</pose>
         <geometry><box><size>0.2 0.11325 0.006</size></box></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
       <visual name="plate_my_mesh_visual">
         <geometry><mesh><uri>model://landing_platform/meshes/plate_my.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.5 0.3 0.1 1</ambient><diffuse>0.9 0.55 0.15 1</diffuse></material>
+        <material><ambient>0.85 0.85 0.85 1</ambient><diffuse>0.97 0.97 0.97 1</diffuse></material>
       </visual>
     </link>
     <joint name="plate_my_joint" type="revolute">

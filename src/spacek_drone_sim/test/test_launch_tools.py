@@ -90,4 +90,6 @@ def test_launch_declares_expected_arguments():
              if isinstance(n, ast.Call) and getattr(n.func, 'id', '') == 'DeclareLaunchArgument'}
     assert names == {'gui', 'px4', 'px4_dir', 'px4_shell', 'px4_delay', 'drone_start', 'lat',
                      'lon', 'alt', 'visual', 'gz_verbosity', 'spawn_delay', 'xrce_agent',
-                     'marker_probe', 'markers_config'}
+                     'marker_probe', 'markers_config', 'px4_overrides_file',
+                     'px4_log_dir', 'px4_run_name', 'environment', 'world_file', 'truth_links',
+                     'px4_record_file', 'px4_active_file', 'agent_profile_file'}

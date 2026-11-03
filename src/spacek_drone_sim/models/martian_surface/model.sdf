@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+  화성 지형 메시 (시각 전용, 충돌 없음). 원본 좌표 그대로이고, 배치 (스케일·자세) 는 월드의 <include> 가 정한다.
+  glb 축: Y 위. 월드 rover_landing_mars.sdf 가 100 배로 키우고 roll 90° 로 세워 언덕 가까운 평평한 패치를 원점에 맞춘다.
+-->
+<sdf version="1.9">
+  <model name="martian_surface">
+    <static>true</static>
+    <link name="link">
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>model://martian_surface/meshes/martian_surface.glb</uri>
+            <scale>100 100 100</scale>
+          </mesh>
+        </geometry>
+        <cast_shadows>false</cast_shadows>
+      </visual>
+    </link>
+  </model>
+</sdf>

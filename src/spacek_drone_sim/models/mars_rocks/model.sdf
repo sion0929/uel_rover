@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<!-- make_mars_rocks.py 가 만든 파일 (직접 고치지 말고 스크립트를 고쳐 다시 만든다).
+     바위 20개, 시각 + 충돌. 자리는 월드 원점 기준 (밑면 12% 를 땅에 묻음). -->
+<sdf version="1.9">
+  <model name="mars_rocks">
+    <static>true</static>
+    <link name="rock_00">
+      <pose>-1.6 4.6 -0.066 0 0 0.349066</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_00.obj</uri><scale>0.55 0.55 0.55</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_00.obj</uri><scale>0.55 0.55 0.55</scale></mesh></geometry>
+        <material><ambient>0.336 0.216 0.152 1</ambient><diffuse>0.42 0.27 0.19 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_01">
+      <pose>2.4 5.3 -0.096 0 0 1.308997</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_01.obj</uri><scale>0.8 0.8 0.8</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_01.obj</uri><scale>0.8 0.8 0.8</scale></mesh></geometry>
+        <material><ambient>0.400 0.264 0.176 1</ambient><diffuse>0.5 0.33 0.22 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_02">
+      <pose>5.6 3.6 -0.054 0 0 2.443461</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_02.obj</uri><scale>0.45 0.45 0.45</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_02.obj</uri><scale>0.45 0.45 0.45</scale></mesh></geometry>
+        <material><ambient>0.288 0.200 0.160 1</ambient><diffuse>0.36 0.25 0.2 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_03">
+      <pose>6.8 -1.2 -0.072 0 0 0.174533</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_03.obj</uri><scale>0.6 0.6 0.6</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_03.obj</uri><scale>0.6 0.6 0.6</scale></mesh></geometry>
+        <material><ambient>0.368 0.240 0.168 1</ambient><diffuse>0.46 0.3 0.21 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_04">
+      <pose>-4.6 1.5 -0.06 0 0 3.490659</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_04.obj</uri><scale>0.5 0.5 0.5</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_04.obj</uri><scale>0.5 0.5 0.5</scale></mesh></geometry>
+        <material><ambient>0.336 0.216 0.152 1</ambient><diffuse>0.42 0.27 0.19 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_05">
+      <pose>-4.2 -2.6 -0.042 0 0 1.658063</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_05.obj</uri><scale>0.35 0.35 0.35</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_05.obj</uri><scale>0.35 0.35 0.35</scale></mesh></geometry>
+        <material><ambient>0.400 0.264 0.176 1</ambient><diffuse>0.5 0.33 0.22 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_06">
+      <pose>4.9 -3.9 -0.048 0 0 5.235988</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_06.obj</uri><scale>0.4 0.4 0.4</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_06.obj</uri><scale>0.4 0.4 0.4</scale></mesh></geometry>
+        <material><ambient>0.288 0.200 0.160 1</ambient><diffuse>0.36 0.25 0.2 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_07">
+      <pose>-2.1 -4.7 -0.036 0 0 0.785398</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_07.obj</uri><scale>0.3 0.3 0.3</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_07.obj</uri><scale>0.3 0.3 0.3</scale></mesh></geometry>
+        <material><ambient>0.368 0.240 0.168 1</ambient><diffuse>0.46 0.3 0.21 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_08">
+      <pose>0.9 7.5 -0.156 0 0 2.792527</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_08.obj</uri><scale>1.3 1.3 1.3</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_08.obj</uri><scale>1.3 1.3 1.3</scale></mesh></geometry>
+        <material><ambient>0.336 0.216 0.152 1</ambient><diffuse>0.42 0.27 0.19 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_09">
+      <pose>-5.5 6.2 -0.132 0 0 4.363323</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_09.obj</uri><scale>1.1 1.1 1.1</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_09.obj</uri><scale>1.1 1.1 1.1</scale></mesh></geometry>
+        <material><ambient>0.400 0.264 0.176 1</ambient><diffuse>0.5 0.33 0.22 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_10">
+      <pose>7.8 5.9 -0.12 0 0 0.523599</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_10.obj</uri><scale>1 1 1</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_10.obj</uri><scale>1 1 1</scale></mesh></geometry>
+        <material><ambient>0.288 0.200 0.160 1</ambient><diffuse>0.36 0.25 0.2 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_11">
+      <pose>8.5 -4.8 -0.108 0 0 2.094395</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_11.obj</uri><scale>0.9 0.9 0.9</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_11.obj</uri><scale>0.9 0.9 0.9</scale></mesh></geometry>
+        <material><ambient>0.368 0.240 0.168 1</ambient><diffuse>0.46 0.3 0.21 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_12">
+      <pose>0.6 0.9 -0.0144 0 0 0.000000</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_12.obj</uri><scale>0.12 0.12 0.12</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_12.obj</uri><scale>0.12 0.12 0.12</scale></mesh></geometry>
+        <material><ambient>0.336 0.216 0.152 1</ambient><diffuse>0.42 0.27 0.19 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_13">
+      <pose>1.6 -0.95 -0.012 0 0 1.047198</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_13.obj</uri><scale>0.1 0.1 0.1</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_13.obj</uri><scale>0.1 0.1 0.1</scale></mesh></geometry>
+        <material><ambient>0.400 0.264 0.176 1</ambient><diffuse>0.5 0.33 0.22 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_14">
+      <pose>-0.5 -1.1 -0.0108 0 0 0.523599</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_14.obj</uri><scale>0.09 0.09 0.09</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_14.obj</uri><scale>0.09 0.09 0.09</scale></mesh></geometry>
+        <material><ambient>0.288 0.200 0.160 1</ambient><diffuse>0.36 0.25 0.2 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_15">
+      <pose>1.9 1.05 -0.0132 0 0 1.396263</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_15.obj</uri><scale>0.11 0.11 0.11</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_15.obj</uri><scale>0.11 0.11 0.11</scale></mesh></geometry>
+        <material><ambient>0.368 0.240 0.168 1</ambient><diffuse>0.46 0.3 0.21 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_16">
+      <pose>3.3 3.2 -0.0216 0 0 0.174533</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_16.obj</uri><scale>0.18 0.18 0.18</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_16.obj</uri><scale>0.18 0.18 0.18</scale></mesh></geometry>
+        <material><ambient>0.336 0.216 0.152 1</ambient><diffuse>0.42 0.27 0.19 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_17">
+      <pose>-1.9 2.9 -0.0192 0 0 2.268928</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_17.obj</uri><scale>0.16 0.16 0.16</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_17.obj</uri><scale>0.16 0.16 0.16</scale></mesh></geometry>
+        <material><ambient>0.400 0.264 0.176 1</ambient><diffuse>0.5 0.33 0.22 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_18">
+      <pose>-3.7 -0.4 -0.024 0 0 1.221730</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_18.obj</uri><scale>0.2 0.2 0.2</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_18.obj</uri><scale>0.2 0.2 0.2</scale></mesh></geometry>
+        <material><ambient>0.288 0.200 0.160 1</ambient><diffuse>0.36 0.25 0.2 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+    <link name="rock_19">
+      <pose>3.9 -2.2 -0.018 0 0 3.490659</pose>
+      <collision name="collision"><geometry><mesh><uri>model://mars_rocks/meshes/rock_19.obj</uri><scale>0.15 0.15 0.15</scale></mesh></geometry></collision>
+      <visual name="visual">
+        <cast_shadows>true</cast_shadows>
+        <geometry><mesh><uri>model://mars_rocks/meshes/rock_19.obj</uri><scale>0.15 0.15 0.15</scale></mesh></geometry>
+        <material><ambient>0.368 0.240 0.168 1</ambient><diffuse>0.46 0.3 0.21 1</diffuse><specular>0.05 0.05 0.05 1</specular></material>
+      </visual>
+    </link>
+  </model>
+</sdf>

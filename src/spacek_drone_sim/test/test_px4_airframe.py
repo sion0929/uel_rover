@@ -7,7 +7,7 @@ import subprocess
 import pytest
 from spacek_drone_sim.drone_params import derive, load_config
 from spacek_drone_sim.px4_airframe import (AIRFRAME_NAME, airframe_text, install_airframe,
-                                           parse_airframe, px4_paths)
+                                           parse_airframe, px4_paths, stage_airframe)
 
 PKG_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = os.path.join(PKG_DIR, 'config', 'drone.yaml')
@@ -44,17 +44,41 @@ def test_motor_range_and_hover_follow_drone_yaml():
 
 
 def test_ekf_is_gps_denied_like_real_drone_at_sensor_positions():
-    """실기체: GPS 없음, 광류 + 거리센서, 높이 기준 = 거리센서 (항상 사용)."""
+    """실기체 GPS 선언 1, 융합 0. 기본 시뮬 GPS 출력은 꺼짐."""
     cfg = load_config(CFG)
     p = _params(cfg)
     assert (p['EKF2_GPS_CTRL'], p['EKF2_OF_CTRL'], p['EKF2_RNG_CTRL']) == (0, 1, 2)
-    assert (p['SYS_HAS_GPS'], p['SIM_GZ_EN_GPS'], p['EKF2_HGT_REF']) == (0, 0, 2)
+    assert (p['SYS_HAS_GPS'], p['SIM_GZ_EN_GPS'], p['EKF2_HGT_REF']) == (1, 0, 2)
     fx, fy, fz = cfg['sensors']['flow']['xyz_m']
     assert (p['EKF2_OF_POS_X'], p['EKF2_OF_POS_Y'], p['EKF2_OF_POS_Z']) == pytest.approx(
         (fx, -fy, -fz), abs=5e-4)
     lx, ly, lz = cfg['sensors']['lidar']['xyz_m']
     assert (p['EKF2_RNG_POS_X'], p['EKF2_RNG_POS_Y'], p['EKF2_RNG_POS_Z']) == pytest.approx(
         (lx, -ly, -lz), abs=5e-4)
+
+
+def test_experiment_override_enables_gps_after_real_params():
+    cfg = load_config(CFG)
+    script = airframe_text(derive(cfg), {'EKF2_GPS_CTRL': 7,
+                                         'MIS_TAKEOFF_ALT': 3.0,
+                                         'COM_RC_IN_MODE': 4})
+    assert 'param set-default SIM_GZ_EN_GPS 1' in script
+    assert script.index('param set-default EKF2_GPS_CTRL 0') < script.index(
+        'param set EKF2_GPS_CTRL 7')
+    assert 'param set MIS_TAKEOFF_ALT 3' in script
+    assert 'param set COM_RC_IN_MODE 4' in script
+    assert 'param set-default EKF2_HGT_REF 2' in script
+    assert 'param set EKF2_HGT_REF' not in script
+    assert cfg['px4_params']['MIS_TAKEOFF_ALT'] == 2.5
+
+
+@pytest.mark.parametrize('bad_overrides', [
+    {'BAD; echo injected': 1}, {'BAD\nCOMMAND': 1},
+    {'EKF2_GPS_CTRL': float('inf')}, {'EKF2_GPS_CTRL': '7'},
+])
+def test_airframe_rejects_unsafe_override_before_shell_script(bad_overrides):
+    with pytest.raises(ValueError):
+        airframe_text(derive(load_config(CFG)), bad_overrides)
 
 
 def test_real_drone_params_are_applied():
@@ -98,6 +122,23 @@ def test_install_airframe_into_px4_build(tmp_path):
     path = install_airframe(str(tmp_path), 'x\n')
     assert os.path.basename(path) == AIRFRAME_NAME
     assert open(path, encoding='utf-8').read() == 'x\n'
+
+
+def test_stage_airframe_does_not_edit_px4_tree(tmp_path):
+    px4_root = tmp_path / 'px4'
+    build = px4_root / 'build' / 'px4_sitl_default'
+    (build / 'bin').mkdir(parents=True)
+    (build / 'bin' / 'px4').write_text('')
+    frames = build / 'etc' / 'init.d-posix' / 'airframes'
+    frames.mkdir(parents=True)
+    (frames / '4001_gz_x500').write_text('base\n')
+    runtime = tmp_path / 'runtime'
+    runtime.mkdir()
+    path = stage_airframe(str(px4_root), str(runtime), 'experiment\n')
+    assert open(path, encoding='utf-8').read() == 'experiment\n'
+    base_frame = runtime / 'etc' / 'init.d-posix' / 'airframes' / '4001_gz_x500'
+    assert base_frame.read_text() == 'base\n'
+    assert not (frames / AIRFRAME_NAME).exists()
 
 
 def test_setup_script_stops_on_other_px4_version(tmp_path):

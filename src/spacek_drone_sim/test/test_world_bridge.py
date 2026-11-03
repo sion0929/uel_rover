@@ -1,13 +1,15 @@
-"""월드·브리지 시험: PX4 시스템 목록, 지면, 카메라·로버·플랫폼 토픽 일치."""
+"""월드·브리지 시험: PX4 시스템 목록, 지면 (지구·화성), 카메라·로버·플랫폼 토픽 일치."""
 
 import os
 import xml.etree.ElementTree as ET
 
+import pytest
 from spacek_drone_sim.drone_params import CAMERAS, load_config
 import yaml
 
 PKG_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 WORLD = os.path.join(PKG_DIR, 'worlds', 'rover_landing_px4.sdf')
+MARS_WORLD = os.path.join(PKG_DIR, 'worlds', 'rover_landing_mars.sdf')
 BRIDGE = os.path.join(PKG_DIR, 'config', 'bridge.yaml')
 CFG = os.path.join(PKG_DIR, 'config', 'drone.yaml')
 ROVER_BRIDGE = os.path.join(os.path.dirname(PKG_DIR), 'drone_landing_platform', 'config',
@@ -21,8 +23,8 @@ PX4_SYSTEMS = {'gz::sim::systems::Physics', 'gz::sim::systems::UserCommands',
                'custom::OpticalFlowSystem'}
 
 
-def _world():
-    return ET.parse(WORLD).getroot().find('world')
+def _world(path=WORLD):
+    return ET.parse(path).getroot().find('world')
 
 
 def _bridge():
@@ -30,8 +32,9 @@ def _bridge():
         return {e['ros_topic_name']: e for e in yaml.safe_load(f)}
 
 
-def test_world_name_systems_and_ground():
-    w = _world()
+@pytest.mark.parametrize('path', [WORLD, MARS_WORLD])
+def test_world_name_systems_and_ground(path):
+    w = _world(path)
     assert w.get('name') == 'rover_landing_px4'
     assert {p.get('name') for p in w.findall('plugin')} == PX4_SYSTEMS
     assert w.find("plugin[@name='gz::sim::systems::Sensors']").findtext('render_engine') == 'ogre2'
@@ -39,6 +42,26 @@ def test_world_name_systems_and_ground():
     assert (ground.findtext('pose') or '0 0 0').split()[2] in ('0', '0.0')
     assert w.find('spherical_coordinates/latitude_deg') is not None
     assert float(w.findtext('physics/max_step_size')) == 0.001
+
+
+def test_mars_world_terrain_is_visual_and_ground_is_flat_collision():
+    w = _world(MARS_WORLD)
+    ground = w.find("model[@name='ground_plane']")
+    assert ground.find('link/collision/geometry/plane') is not None
+    assert ground.find('link/visual') is None          # 바닥은 화성 지형 메시가 보여 준다
+    assert w.findtext('gravity') == _world().findtext('gravity')    # 물리는 지구 월드와 같음
+    models = os.path.join(PKG_DIR, 'models')
+    uris = [inc.findtext('uri') for inc in w.findall('include')]
+    assert uris == ['model://martian_surface', 'model://mars_rocks']
+    for uri in uris:
+        name = uri[len('model://'):]
+        model = ET.parse(os.path.join(models, name, 'model.sdf')).getroot().find('model')
+        for mesh in model.iter('mesh'):
+            rel = mesh.findtext('uri')[len('model://'):]
+            assert os.path.isfile(os.path.join(models, rel)), rel
+    terrain = ET.parse(os.path.join(models, 'martian_surface', 'model.sdf')).getroot()
+    assert terrain.find('model/link/collision') is None
+    assert os.path.isfile(os.path.join(models, 'martian_surface', 'ATTRIBUTION.md'))
 
 
 def test_camera_topics_match_drone_model():
@@ -71,3 +94,12 @@ def test_rover_tf_does_not_share_base_link_with_drone():
     assert '/tf' not in b
     assert b['/rover/tf']['gz_topic_name'] == '/model/spacek_rover/tf'
     assert b['/rover/tf']['direction'] == 'GZ_TO_ROS'
+
+
+def test_lidar_bridge_uses_the_same_gazebo_topic_as_px4():
+    entry = _bridge()['/air_ground/lidar_scan']
+    assert entry['gz_topic_name'] == (
+        '/world/rover_landing_px4/model/spacek_drone/'
+        'link/lidar_sensor_link/sensor/lidar/scan')
+    assert entry['ros_type_name'] == 'sensor_msgs/msg/LaserScan'
+    assert entry['direction'] == 'GZ_TO_ROS'

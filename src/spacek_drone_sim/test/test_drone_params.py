@@ -18,10 +18,13 @@ def _cfg():
 def test_hover_matches_real_flight_and_motor_range():
     """실비행 hover_thrust_estimate 0.35 (09-21 로그) 를 맞추도록 최소 회전수를 정한다."""
     p = derive(_cfg())
-    hover = math.sqrt(1.9 * 9.80665 / (4 * 8.54858e-06))
-    assert p['hover_rot_velocity'] == pytest.approx(738.18, abs=0.05)
-    w_max = hover * math.sqrt(5.0)
+    hover = math.sqrt(1.9 * 9.80665 / (4 * 5.486e-06))
+    assert p['hover_rot_velocity'] == pytest.approx(921, abs=2)
+    w_max = hover * math.sqrt(4.97)
     assert p['max_rot_velocity'] == pytest.approx(w_max)
+    assert p['max_rot_velocity'] == pytest.approx(2054, abs=3)
+    assert p['max_rot_velocity'] * 60 / (2 * math.pi) == pytest.approx(19617, abs=30)
+    assert p['min_rot_velocity'] == pytest.approx(311, abs=3)
     assert p['hover_actuator'] == pytest.approx(0.35)
     assert p['min_rot_velocity'] == pytest.approx((hover - 0.35 * w_max) / 0.65)
     assert (p['hover_rot_velocity'] - p['min_rot_velocity']) / (
