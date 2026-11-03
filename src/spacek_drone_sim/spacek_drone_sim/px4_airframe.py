@@ -1,11 +1,15 @@
-"""PX4 기체 설정 파일 (4901_gz_spacek_drone) 생성·설치와 PX4 SITL 경로 (ROS 비의존).
+"""PX4 기체 설정 파일 (4901_gz_spacek_drone) 생성·스테이징과 PX4 SITL 경로 (ROS 비의존).
 
-launch 가 실행마다 drone.yaml 로 이 파일을 새로 만들어 PX4 빌드 폴더의 airframes 에 넣는다.
+기본 3a launch는 drone.yaml로 생성해 PX4 빌드 트리에 설치한다. 실험용
+px4_log_dir 또는 px4_overrides_file이 있으면 실행별 작업 폴더의 etc 사본에 넣는다.
 패키지 안의 px4/4901_gz_spacek_drone 은 같은 생성기의 출력 (참고·수동 설치용):
   python3 -m spacek_drone_sim.px4_airframe config/drone.yaml px4/4901_gz_spacek_drone
 """
 
+import math
 import os
+import re
+import shutil
 import sys
 
 from spacek_drone_sim.drone_params import AIRFRAME_ID, derive, frd, load_config, MODEL_NAME
@@ -13,6 +17,23 @@ from spacek_drone_sim.drone_params import AIRFRAME_ID, derive, frd, load_config,
 AIRFRAME_NAME = '%d_gz_%s' % (AIRFRAME_ID, MODEL_NAME)
 PX4_TAG = 'v1.17.0'
 SITL_BUILD = os.path.join('build', 'px4_sitl_default')
+PARAM_NAME = re.compile(r'^[A-Z][A-Z0-9_]*$')
+
+
+def normalize_overrides(raw):
+    """Validate values before placing them in the PX4 /bin/sh airframe script."""
+    if not isinstance(raw, dict):
+        raise ValueError('px4 overrides must be a mapping')
+    result = {}
+    for name, value in raw.items():
+        if not isinstance(name, str) or not PARAM_NAME.fullmatch(name):
+            raise ValueError('invalid PX4 parameter name: %r' % name)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError('%s must have a numeric value' % name)
+        if not math.isfinite(value):
+            raise ValueError('%s must have a finite value' % name)
+        result[name] = value
+    return result
 
 
 def _value(v):
@@ -21,7 +42,8 @@ def _value(v):
     return '%d' % v if v.is_integer() else '%g' % v
 
 
-def airframe_text(p):
+def airframe_text(p, overrides=None):
+    overrides = normalize_overrides(overrides if overrides is not None else {})
     out = ['#!/bin/sh',
            '#',
            '# @name Gazebo spacek_drone (대회 기체: Pixhawk 6X, H-Flow, 전방 60도 + 하방 카메라)',
@@ -48,8 +70,8 @@ def airframe_text(p):
             '# 실비행 호버 출력 (09-21 로그 hover_thrust_estimate)',
             'param set-default MPC_THR_HOVER %.2f' % p['hover_actuator'],
             '',
-            '# 가제보 센서 (실기체에 GPS 없음)',
-            'param set-default SIM_GZ_EN_GPS 0',
+            '# 가제보 센서 (실기 프로필 GPS 융합 없음; 실험 덮어쓰기일 때 활성화)',
+            'param set-default SIM_GZ_EN_GPS %d' % bool(overrides.get('EKF2_GPS_CTRL', 0)),
             'param set-default SIM_GZ_EN_BARO 1',
             'param set-default SIM_GZ_EN_FLOW 1',
             'param set-default SIM_GZ_EN_LIDAR 1',
@@ -62,6 +84,10 @@ def airframe_text(p):
     for prefix, xyz in (('EKF2_OF_POS', p['flow_xyz']), ('EKF2_RNG_POS', p['lidar_xyz'])):
         for axis, v in zip('XYZ', frd(xyz)):
             out.append('param set-default %s_%s %.3f' % (prefix, axis, v))
+    if overrides:
+        out += ['', '# air_ground_loc experiment.yaml: 부팅 시 적용할 실험 전용 값']
+        out += ['param set %s %s' % (name, _value(value))
+                for name, value in sorted(overrides.items())]
     return '\n'.join(out) + '\n'
 
 
@@ -94,6 +120,18 @@ def install_airframe(px4_dir, text):
     path = os.path.join(px4_paths(px4_dir)['airframes'], AIRFRAME_NAME)
     with open(path, 'w', encoding='utf-8', newline='\n') as f:
         f.write(text)
+    os.chmod(path, 0o755)
+    return path
+
+
+def stage_airframe(px4_dir, runtime_root, text):
+    """Copy the small PX4 etc tree and add this airframe without editing PX4."""
+    source = os.path.join(px4_paths(px4_dir)['root'], SITL_BUILD, 'etc')
+    destination = os.path.join(runtime_root, 'etc')
+    shutil.copytree(source, destination)
+    path = os.path.join(destination, 'init.d-posix', 'airframes', AIRFRAME_NAME)
+    with open(path, 'w', encoding='utf-8', newline='\n') as stream:
+        stream.write(text)
     os.chmod(path, 0o755)
     return path
 

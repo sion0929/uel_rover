@@ -29,12 +29,12 @@
       <visual name="drone_mesh_visual">
         <pose>0 0 0 0 0 0</pose>
         <geometry><mesh><uri>model://spacek_drone/meshes/drone.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.1 0.1 0.15 1</ambient><diffuse>0.25 0.25 0.35 1</diffuse></material>
+        <material><ambient>0.03 0.03 0.03 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse><specular>0.2 0.2 0.2 1</specular></material>
       </visual>
       <visual name="front_case_visual">
         <pose>0.0679 0.076092 -0.107068 0 -1.57079633 3.14159265</pose>
         <geometry><mesh><uri>model://spacek_drone/meshes/front_cam_case_60.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.8 0.8 0.8 1</ambient><diffuse>0.92 0.92 0.92 1</diffuse></material>
+        <material><ambient>0.03 0.03 0.03 1</ambient><diffuse>0.07 0.07 0.07 1</diffuse><specular>0.2 0.2 0.2 1</specular></material>
       </visual>
       <visual name="down_camera_visual">
         <pose>0 0 -0.12 0 0 0</pose>
@@ -218,8 +218,8 @@
       <turningDirection>ccw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>1650.61259</maxRotVelocity>
-      <motorConstant>8.54858e-06</motorConstant>
+      <maxRotVelocity>2054.26958</maxRotVelocity>
+      <motorConstant>5.486e-06</motorConstant>
       <momentConstant>0.016</momentConstant>
       <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>0</motorNumber>
@@ -234,8 +234,8 @@
       <turningDirection>ccw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>1650.61259</maxRotVelocity>
-      <motorConstant>8.54858e-06</motorConstant>
+      <maxRotVelocity>2054.26958</maxRotVelocity>
+      <motorConstant>5.486e-06</motorConstant>
       <momentConstant>0.016</momentConstant>
       <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>1</motorNumber>
@@ -250,8 +250,8 @@
       <turningDirection>cw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>1650.61259</maxRotVelocity>
-      <motorConstant>8.54858e-06</motorConstant>
+      <maxRotVelocity>2054.26958</maxRotVelocity>
+      <motorConstant>5.486e-06</motorConstant>
       <momentConstant>0.016</momentConstant>
       <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>2</motorNumber>
@@ -266,8 +266,8 @@
       <turningDirection>cw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>1650.61259</maxRotVelocity>
-      <motorConstant>8.54858e-06</motorConstant>
+      <maxRotVelocity>2054.26958</maxRotVelocity>
+      <motorConstant>5.486e-06</motorConstant>
       <momentConstant>0.016</momentConstant>
       <commandSubTopic>command/motor_speed</commandSubTopic>
       <motorNumber>3</motorNumber>
@@ -275,6 +275,13 @@
       <rollingMomentCoefficient>1e-06</rollingMomentCoefficient>
       <rotorVelocitySlowdownSim>10</rotorVelocitySlowdownSim>
       <motorType>velocity</motorType>
+    </plugin>
+    <!-- Model/world pose from Gazebo for stage-1 flight truth (not PX4 odometry). -->
+    <plugin filename="gz-sim-pose-publisher-system" name="gz::sim::systems::PosePublisher">
+      <publish_model_pose>true</publish_model_pose>
+      <publish_link_pose>false</publish_link_pose>
+      <use_pose_vector_msg>true</use_pose_vector_msg>
+      <update_frequency>50</update_frequency>
     </plugin>
   </model>
 </sdf>

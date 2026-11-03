@@ -4,7 +4,7 @@ spacek 스키드 조향 로버(다이나믹셀 좌우 2개, 바퀴 4개)의 ROS 
 좌우 바퀴를 같은 방향으로 돌리면 전진/후진, 반대로 돌리면 선회(제자리 선회 포함)합니다. 같은 쪽 앞뒤 바퀴는 연결되어 있어
 다이나믹셀 1개가 바퀴 2개를 같은 속도로 돌립니다.
 
-설계: `ros2_ws/docs/superpowers/specs/2026-10-09-spacek-rover-gazebo-design.md` (1단계: 로버 단독 주행)
+설계: `docs/superpowers/specs/2026-10-09-spacek-rover-gazebo-design.md` (1단계: 로버 단독 주행)
 
 ## 1. 구조
 
@@ -44,10 +44,8 @@ spacek 스키드 조향 로버(다이나믹셀 좌우 2개, 바퀴 4개)의 ROS 
 
 ```bash
 sudo apt install -y ros-jazzy-ros-gz ros-jazzy-teleop-twist-keyboard python3-yaml python3-pytest
-mkdir -p ~/ros2_ws/src
-cp -r <이 패키지 폴더> ~/ros2_ws/src/spacek_rover
 source /opt/ros/jazzy/setup.bash
-cd ~/ros2_ws
+cd ~/uel_rover                  # 저장소 = 워크스페이스 (LINUX_SETUP.md)
 colcon build --packages-select spacek_rover
 source install/setup.bash
 ```

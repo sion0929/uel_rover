@@ -176,7 +176,7 @@ sudo apt install -y ros-jazzy-ros-gz python3-yaml python3-pytest
 
 # 빌드
 source /opt/ros/jazzy/setup.bash
-cd ~/ros2_ws            # src/drone_landing_platform, src/spacek_rover 를 복사해 둔 워크스페이스
+cd ~/uel_rover          # 저장소 = 워크스페이스 (LINUX_SETUP.md)
 rosdep install --from-paths src --ignore-src -y
 colcon build --packages-select spacek_rover drone_landing_platform
 # (고정 플랫폼만 쓸 때는 drone_landing_platform 만 빌드해도 됨. rover:=true 는 spacek_rover 필요)
@@ -193,22 +193,20 @@ wsl --update                       # WSLg(GUI) 포함 최신 커널
 ```
 
 ```bash
-# Ubuntu-24.04 (WSL) 안에서: Windows 바탕화면의 소스를 워크스페이스로 복사
-mkdir -p ~/ros2_ws/src
-cp -r "/mnt/c/Users/sion0/Desktop/로버플랫폼프로토타입/ros2_ws/src/drone_landing_platform" ~/ros2_ws/src/
-cp -r "/mnt/c/Users/sion0/Desktop/로버플랫폼프로토타입/ros2_ws/src/spacek_rover" ~/ros2_ws/src/
+# Ubuntu-24.04 (WSL) 안에서: 저장소를 리눅스 홈에 클론
+git clone https://github.com/sion0929/uel_rover.git ~/uel_rover
 # (5장의 설치/빌드 명령 실행)
 export GZ_IP=127.0.0.1             # WSL 에서 gz-transport 탐색 문제 예방 (~/.bashrc 에 추가 권장)
 # GUI 가 느리거나 검은 화면이면: export LIBGL_ALWAYS_SOFTWARE=1  또는 gui:=false (헤드리스)
 ```
-`/mnt/c` 위에서 직접 빌드하면 매우 느리므로 반드시 리눅스 홈(`~/ros2_ws`)으로 복사해서 빌드하세요.
+`/mnt/c` 위에서 직접 빌드하면 매우 느리므로 반드시 리눅스 홈(`~/uel_rover`)에 두고 빌드하세요.
 
 ---
 
 ## 7. 실행
 
 ```bash
-source /opt/ros/jazzy/setup.bash && source ~/ros2_ws/install/setup.bash
+source /opt/ros/jazzy/setup.bash && source ~/uel_rover/install/setup.bash
 
 ros2 launch drone_landing_platform landing_sim.launch.py scenario:=center   # 중앙, yaw 0
 ros2 launch drone_landing_platform landing_sim.launch.py scenario:=x30      # x = +30 mm
@@ -222,8 +220,8 @@ ros2 launch drone_landing_platform landing_sim.launch.py scenario:=x60 gui:=fals
 ros2 launch drone_landing_platform landing_sim.launch.py mode:=sw_openloop
 
 # 4개 시나리오 연속 실행 (헤드리스) → ~/landing_results/
-bash ~/ros2_ws/src/drone_landing_platform/scripts/run_all.sh
-MODE=sw_openloop bash ~/ros2_ws/src/drone_landing_platform/scripts/run_all.sh
+bash ~/uel_rover/src/drone_landing_platform/scripts/run_all.sh
+MODE=sw_openloop bash ~/uel_rover/src/drone_landing_platform/scripts/run_all.sh
 ```
 
 모니터링:
@@ -284,7 +282,7 @@ STL 추가 후 재빌드하세요.
 ## 11. 테스트
 
 ```bash
-cd ~/ros2_ws && colcon test --packages-select spacek_rover drone_landing_platform && colcon test-result --verbose
+cd ~/uel_rover && colcon test --packages-select spacek_rover drone_landing_platform && colcon test-result --verbose
 # 또는 패키지 폴더에서:  python3 -m pytest test/test_coupling.py test/test_sdf_wellformed.py test/test_rover_mount.py -v
 # (test_rover_mount.py 는 옆 폴더 ../spacek_rover 또는 설치된 spacek_rover 의 모델을 읽음)
 ```
@@ -318,7 +316,7 @@ cd ~/ros2_ws && colcon test --packages-select spacek_rover drone_landing_platfor
 ## 13. 로버 위 플랫폼 (2단계: 정지 로버)
 
 바퀴 달린 로버(`spacek_rover` 패키지, 다이나믹셀 스키드 조향) 위에 이 플랫폼(REV-E4)을 고정하고 같은 4개 시나리오를 실행합니다.
-설계: `ros2_ws/docs/superpowers/specs/2026-10-09-rover-platform-mount-design.md`
+설계: `docs/superpowers/specs/2026-10-09-rover-platform-mount-design.md`
 
 ```bash
 ros2 launch drone_landing_platform rover_landing_sim.launch.py scenario:=center gui:=false shutdown_on_done:=true

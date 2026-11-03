@@ -55,20 +55,20 @@
       <collision name="arm_right_rear_col"><pose>-0.15137 -0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry></collision>
 
       <!-- 박스 대체 비주얼 (메시가 없을 때) -->
-      <visual name="chassis_box_visual"><pose>-0.000341 0 0.135040 0 0 0</pose><geometry><box><size>0.415 0.200 0.123</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
-      <visual name="top_plate_box_visual"><pose>0.034659 0 0.212040 0 0 0</pose><geometry><box><size>0.325 0.180 0.005</size></box></geometry><material><ambient>0.4 0.4 0.42 1</ambient><diffuse>0.65 0.65 0.68 1</diffuse></material></visual>
-      <visual name="arm_left_center_box_visual"><pose>-0.00318 0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
-      <visual name="arm_left_front_box_visual"><pose>0.14819 0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
-      <visual name="arm_left_rear_box_visual"><pose>-0.15137 0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
-      <visual name="arm_right_center_box_visual"><pose>-0.00318 -0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
-      <visual name="arm_right_front_box_visual"><pose>0.14819 -0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
-      <visual name="arm_right_rear_box_visual"><pose>-0.15137 -0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry><material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material></visual>
+      <visual name="chassis_box_visual"><pose>-0.000341 0 0.135040 0 0 0</pose><geometry><box><size>0.415 0.200 0.123</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
+      <visual name="top_plate_box_visual"><pose>0.034659 0 0.212040 0 0 0</pose><geometry><box><size>0.325 0.180 0.005</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
+      <visual name="arm_left_center_box_visual"><pose>-0.00318 0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
+      <visual name="arm_left_front_box_visual"><pose>0.14819 0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
+      <visual name="arm_left_rear_box_visual"><pose>-0.15137 0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
+      <visual name="arm_right_center_box_visual"><pose>-0.00318 -0.126 0.10044 0 0 0</pose><geometry><box><size>0.1291 0.040 0.0526</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
+      <visual name="arm_right_front_box_visual"><pose>0.14819 -0.126 0.05022 0 0.5245 0</pose><geometry><box><size>0.2006 0.040 0.0455</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
+      <visual name="arm_right_rear_box_visual"><pose>-0.15137 -0.126 0.05022 0 -0.5407 0</pose><geometry><box><size>0.1951 0.040 0.0455</size></box></geometry><material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material></visual>
 
       <!-- 메시 비주얼 (STL = 마스터 + 오프셋, mm) -->
       <visual name="base_mesh_visual">
         <pose>0.301769 -0.14599 -0.0241373 1.5707963 0 3.1415927</pose>
         <geometry><mesh><uri>model://spacek_rover/meshes/base.stl</uri><scale>0.001 0.001 0.001</scale></mesh></geometry>
-        <material><ambient>0.3 0.3 0.32 1</ambient><diffuse>0.45 0.46 0.5 1</diffuse></material>
+        <material><ambient>0.38 0.39 0.41 1</ambient><diffuse>0.58 0.6 0.63 1</diffuse><specular>0.9 0.9 0.9 1</specular></material>
       </visual>
     </link>
 

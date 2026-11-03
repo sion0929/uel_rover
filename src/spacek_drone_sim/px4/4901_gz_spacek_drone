@@ -23,26 +23,27 @@ param set-default CA_ROTOR3_PX -0.1329
 param set-default CA_ROTOR3_PY 0.1329
 param set-default CA_ROTOR3_KM -0.050
 
-param set-default SIM_GZ_EC_MIN1 247
-param set-default SIM_GZ_EC_MAX1 1651
-param set-default SIM_GZ_EC_MIN2 247
-param set-default SIM_GZ_EC_MAX2 1651
-param set-default SIM_GZ_EC_MIN3 247
-param set-default SIM_GZ_EC_MAX3 1651
-param set-default SIM_GZ_EC_MIN4 247
-param set-default SIM_GZ_EC_MAX4 1651
+param set-default SIM_GZ_EC_MIN1 311
+param set-default SIM_GZ_EC_MAX1 2054
+param set-default SIM_GZ_EC_MIN2 311
+param set-default SIM_GZ_EC_MAX2 2054
+param set-default SIM_GZ_EC_MIN3 311
+param set-default SIM_GZ_EC_MAX3 2054
+param set-default SIM_GZ_EC_MIN4 311
+param set-default SIM_GZ_EC_MAX4 2054
 
 # 실비행 호버 출력 (09-21 로그 hover_thrust_estimate)
 param set-default MPC_THR_HOVER 0.35
 
-# 가제보 센서 (실기체에 GPS 없음)
+# 가제보 센서 (실기 프로필 GPS 융합 없음; 실험 덮어쓰기일 때 활성화)
 param set-default SIM_GZ_EN_GPS 0
 param set-default SIM_GZ_EN_BARO 1
 param set-default SIM_GZ_EN_FLOW 1
 param set-default SIM_GZ_EN_LIDAR 1
 
 # 실기체 파라미터 (drone.yaml px4_params, 09-21 비행 로그)
-param set-default SYS_HAS_GPS 0
+param set-default SYS_HAS_GPS 1
+param set-default COM_ARM_WO_GPS 1
 param set-default EKF2_GPS_CTRL 0
 param set-default EKF2_HGT_REF 2
 param set-default EKF2_OF_CTRL 1
@@ -68,6 +69,14 @@ param set-default MC_PITCHRATE_D 0.004
 param set-default MPC_XY_VEL_MAX 1
 param set-default MPC_XY_CRUISE 0.5
 param set-default MPC_VEL_MANUAL 1
+param set-default MPC_TKO_SPEED 1.5
+param set-default MPC_LAND_SPEED 0.7
+param set-default MPC_LAND_CRWL 0.3
+param set-default MPC_LAND_RADIUS 1000
+param set-default MIS_TAKEOFF_ALT 2.5
+param set-default NAV_DLL_ACT 0
+param set-default COM_OF_LOSS_T 1
+param set-default COM_LOW_BAT_ACT 0
 param set-default NAV_ACC_RAD 2
 
 # 시뮬에 조종기 없음: 오프보드가 조종기 상실 페일세이프로 끊기지 않게 (설계 6장)

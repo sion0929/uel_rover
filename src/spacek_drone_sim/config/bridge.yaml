@@ -8,6 +8,20 @@
   gz_type_name: gz.msgs.Clock
   direction: GZ_TO_ROS
 
+# Gazebo 모델 월드 자세 참값. PosePublisher 는 spacek_drone/model.sdf 에 있음.
+- ros_topic_name: /air_ground/truth_pose
+  gz_topic_name: /model/spacek_drone/pose
+  ros_type_name: tf2_msgs/msg/TFMessage
+  gz_type_name: gz.msgs.Pose_V
+  direction: GZ_TO_ROS
+
+# PX4 GZBridge 가 직접 구독하는 동일한 H-Flow ToF scan 토픽 (PX4 소스 변경 없음).
+- ros_topic_name: /air_ground/lidar_scan
+  gz_topic_name: /world/rover_landing_px4/model/spacek_drone/link/lidar_sensor_link/sensor/lidar/scan
+  ros_type_name: sensor_msgs/msg/LaserScan
+  gz_type_name: gz.msgs.LaserScan
+  direction: GZ_TO_ROS
+
 # ---- 플랫폼 조인트 상태 (floor_joint, plate_*_joint): 합칠 때 토픽을 명시함 ----
 - ros_topic_name: /joint_states
   gz_topic_name: /model/landing_platform/joint_state
